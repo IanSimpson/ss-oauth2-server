@@ -14,6 +14,7 @@
     "silverstripe/cms": "~3.1",
     "silverstripe/framework": "~3.1",
     "league/oauth2-server": "*",
-    "guzzlehttp/psr7": "*"
+    "guzzlehttp/psr7": "*",
+    "iansimpson/psr7-adapters": "*"
   }
 }

@@ -165,7 +165,8 @@
 				$publicKey
 			);
 			$request = \GuzzleHttp\Psr7\ServerRequest::fromGlobals();
-
+			$auth = $request->getHeader('Authorization');
+			if((!$auth || !sizeof($auth)) && $_SERVER['AUTHORIZATION']) $request = $request->withAddedHeader('Authorization',$_SERVER['AUTHORIZATION']);
 
 			try {
 				$request = $server->validateAuthenticatedRequest($request);

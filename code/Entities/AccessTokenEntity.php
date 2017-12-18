@@ -49,7 +49,9 @@ class AccessTokenEntity extends \DataObject implements AccessTokenEntityInterfac
 	}
 
 	public function getClient() {
-		return \DataObject::get_one("IanSimpson\Entities\ClientEntity", $this->ClientID);
+		return ClientEntity::get()->filter(array(
+			 'ID' => $this->ClientID
+		))->first();
 	}
 
 

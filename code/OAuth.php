@@ -178,8 +178,8 @@
 		public static function getMember($controller) {
 			$request = self::authenticateRequest($controller);
 			if(!$request) return false;
-			
-			$member = \DataObject::get_by_id("Member", $request->getAttributes()['oauth_user_id']);
-			return $member;
+			return \Member::get()->filter(array(
+				"ID" => $request->getAttributes()['oauth_user_id']
+			))->first();
 		}
 	}

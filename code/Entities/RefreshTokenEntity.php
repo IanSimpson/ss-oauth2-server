@@ -34,7 +34,9 @@ class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterf
 	}
 
 	public function getAccessToken() {
-		return \DataObject::get_one("IanSimpson\Entities\AccessTokenEntity", $this->AccessTokenID);
+		return AccessTokenEntity::get()->filter(array(
+			 'ID' => $this->AccessTokenID
+		))->first();
 	}
 
 

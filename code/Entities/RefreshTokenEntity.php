@@ -25,7 +25,7 @@ class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterf
 		'AccessToken' => 'IanSimpson\Entities\AccessTokenEntity',
 	);
 
-	public function getIdentifer() {
+	public function getIdentifier() {
 		return $this->Code;
 	}
 
@@ -40,7 +40,7 @@ class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterf
 	}
 
 
-	public function setIdentifer($code) {
+	public function setIdentifier($code) {
 		$this->Code = $code;
 	}
 

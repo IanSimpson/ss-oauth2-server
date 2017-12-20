@@ -32,7 +32,7 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 		'ScopeEntities' => 'IanSimpson\Entities\ScopeEntity',
 	);
 
-	public function getIdentifer() {
+	public function getIdentifier() {
 		return $this->Code;
 	}
 
@@ -55,7 +55,7 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 	}
 
 
-	public function setIdentifer($code) {
+	public function setIdentifier($code) {
 		$this->Code = $code;
 	}
 

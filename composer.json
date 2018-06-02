@@ -1,19 +1,24 @@
 {
-  "name": "iansimpson/ss-oauth2-server",
-  "description": "Silverstripe OAuth 2.0 Server",
-  "type": "silverstripe-module",
-  "homepage": "https://logicstudio.nz",
-  "keywords": ["silverstripe", "oauth", "oauth2", "oauth 2", "oauth 2.0"],
-  "license": "MIT",
-  "authors": [
-    {"name": "Ian Simpson","email": "ian@iansimpson.nz"}
-  ],
-  "support": {
-  },
-  "require": {
-    "silverstripe/cms": "~3.1",
-    "silverstripe/framework": "~3.1",
-    "league/oauth2-server": "*",
-    "guzzlehttp/psr7": "*"
-  }
+    "name": "iansimpson/ss-oauth2-server",
+    "description": "Silverstripe OAuth 2.0 Server",
+    "type": "silverstripe-vendormodule",
+    "homepage": "https://logicstudio.nz",
+    "keywords": ["silverstripe", "oauth", "oauth2", "oauth 2", "oauth 2.0"],
+    "license": "MIT",
+    "authors": [
+        {"name": "Ian Simpson","email": "ian@iansimpson.nz"}
+    ],
+    "autoload": {
+        "psr-4": {
+            "IanSimpson\\OAuth2\\": "src/",
+            "IanSimpson\\OAuth2\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "silverstripe/siteconfig": "^4",
+        "silverstripe/framework": "^4",
+        "league/oauth2-server": "^7",
+        "guzzlehttp/psr7": "^1.4",
+        "robbie/psr7-adapters": "^1"
+    }
 }

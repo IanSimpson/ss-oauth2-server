@@ -2,10 +2,14 @@
 Name: IanSimpson
 After: framework/routes#coreroutes
 ---
-Director:
+Silverstripe\Control\Director:
   rules:
-    'oauth': 'IanSimpson\OauthServerController'
-IanSimpson\OauthServerController:
+    'oauth': IanSimpson\OAuth2\OauthServerController
+IanSimpson\OAuth2\OauthServerController:
   privateKey: '../private.key'
   publicKey: '../public.key'
   encryptionKey: ''
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - IanSimpson\OAuth2\Admin\ClientAdmin
+    - IanSimpson\OAuth2\Admin\ScopeAdmin

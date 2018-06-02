@@ -4,20 +4,20 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
-use IanSimpson\Entities\AuthCodeEntity;
+use IanSimpson\OAuth2\Entities\AuthCodeEntity;
 
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
 
     public function getAuthCode($codeId)
     {
-        $codes = AuthCodeEntity::get()->filter(array(
+        $codes = AuthCodeEntity::get()->filter([
             'Code' => $codeId,
-        ));
+        ]);
         return $codes->first();
     }
     /**

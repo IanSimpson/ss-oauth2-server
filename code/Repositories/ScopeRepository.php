@@ -4,11 +4,11 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
-use IanSimpson\Entities\ScopeEntity;
+use IanSimpson\OAuth2\Entities\ScopeEntity;
 
 class ScopeRepository implements ScopeRepositoryInterface
 {
@@ -17,9 +17,9 @@ class ScopeRepository implements ScopeRepositoryInterface
      */
     public function getScopeEntityByIdentifier($scopeIdentifier)
     {
-        $scopes = ScopeEntity::get()->filter(array(
+        $scopes = ScopeEntity::get()->filter([
             'ScopeIdentifier' => $scopeIdentifier,
-        ));
+        ]);
 
         if (!sizeof($scopes)) {
             return;

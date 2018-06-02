@@ -4,15 +4,23 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
-use IanSimpson\Entities\UserEntity;
+use IanSimpson\OAuth2\Entities\UserEntity;
 
 class UserRepository implements UserRepositoryInterface
 {
     /**
      * {@inheritdoc}
      */
+    public function getUserEntityByUserCredentials(
+        $username,
+        $password,
+        $grantType,
+        ClientEntityInterface $clientEntity
+    ) {
+        return new UserEntity();
+    }
 }

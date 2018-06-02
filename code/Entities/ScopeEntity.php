@@ -4,41 +4,45 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Entities;
+namespace IanSimpson\OAuth2\Entities;
 
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\SiteConfig\SiteConfig;
 
-class ScopeEntity extends \DataObject implements ScopeEntityInterface
+class ScopeEntity extends DataObject implements ScopeEntityInterface
 {
     use EntityTrait;
 
-	protected static $singular_name = 'OAuth Scope';
-	protected static $plural_name = 'OAuth Scopes';
+    private static $table_name = 'OAuth_ScopeEntity';
 
-	public static $has_one = array(
-		'SiteConfig' => 'SiteConfig'
-	);
+    private static $singular_name = 'OAuth Scope';
+    private static $plural_name = 'OAuth Scopes';
 
-	public static $db = array(
-		'ScopeIdentifier' => 'Varchar(32)',
-		'ScopeDescription' => 'Text',
-	);
+    private static $db = [
+        'ScopeIdentifier' => 'Varchar(32)',
+        'ScopeDescription' => 'Text'
+    ];
 
-	public static $summary_fields = array(
-		'ScopeIdentifier',
-	);
+    private static $has_one = [
+        'SiteConfig' => SiteConfig::class
+    ];
 
-	private static $indexes = array(
-		'ScopeIdentifier' => array(
-			'type' => 'index',
-			'value' => '"ScopeIdentifier"',
-		),
-		'ScopeIdentifierUnique' => array(
-			'type' => 'unique',
-			'value' => '"ScopeIdentifier"',
-		),
-	);
+    private static $summary_fields = [
+        'ScopeIdentifier'
+    ];
+
+    private static $indexes = [
+        'ScopeIdentifier' => [
+            'type' => 'index',
+            'columns' => ['ScopeIdentifier']
+        ],
+        'ScopeIdentifierUnique' => [
+            'type' => 'unique',
+            'columns' => ['ScopeIdentifier']
+        ]
+    ];
 
     public function jsonSerialize()
     {

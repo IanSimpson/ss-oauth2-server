@@ -4,20 +4,20 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
-use IanSimpson\Entities\AccessTokenEntity;
+use IanSimpson\OAuth2\Entities\AccessTokenEntity;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
     public function getAccessToken($tokenId)
     {
-        $clients = AccessTokenEntity::get()->filter(array(
+        $clients = AccessTokenEntity::get()->filter([
             'Code' => $tokenId,
-        ));
+        ]);
         return $clients->first();
     }
     /**

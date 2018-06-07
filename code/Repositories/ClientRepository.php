@@ -4,21 +4,21 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
-use IanSimpson\Entities\ClientEntity;
+use IanSimpson\OAuth2\Entities\ClientEntity;
 
 class ClientRepository implements ClientRepositoryInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true)
+    public function getClientEntity($clientIdentifier, $grantType = null, $clientSecret = null, $mustValidateSecret = true)
     {
-        $clients = ClientEntity::get()->filter(array(
+        $clients = ClientEntity::get()->filter([
             'ClientIdentifier' => $clientIdentifier,
-        ));
+        ]);
 
         // Check if client is registered
         if (!sizeof($clients)) {
@@ -27,13 +27,12 @@ class ClientRepository implements ClientRepositoryInterface
 
         $client = $clients->first();
 
-        if (
-            $mustValidateSecret === true
+        if ($mustValidateSecret === true
             && $client->ClientSecret != $clientSecret
         ) {
             return;
         }
-        
+
         return $client;
     }
 }

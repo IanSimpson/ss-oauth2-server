@@ -4,20 +4,20 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Repositories;
+namespace IanSimpson\OAuth2\Repositories;
 
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
-use IanSimpson\Entities\RefreshTokenEntity;
+use IanSimpson\OAuth2\Entities\RefreshTokenEntity;
 
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
 
     public function getRefreshToken($tokenId)
     {
-        $clients = RefreshTokenEntity::get()->filter(array(
+        $clients = RefreshTokenEntity::get()->filter([
             'Code' => $tokenId,
-        ));
+        ]);
         return $clients->first();
     }
     /**

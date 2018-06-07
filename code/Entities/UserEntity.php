@@ -4,9 +4,10 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-namespace IanSimpson\Entities;
+namespace IanSimpson\OAuth2\Entities;
 
 use League\OAuth2\Server\Entities\UserEntityInterface;
+use SilverStripe\Security\Member;
 
 class UserEntity implements UserEntityInterface
 {
@@ -17,6 +18,6 @@ class UserEntity implements UserEntityInterface
      */
     public function getIdentifier()
     {
-    	return \Member::currentUserID();
+        return Member::currentUserID();
     }
 }

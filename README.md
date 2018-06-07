@@ -35,7 +35,7 @@ chmod 600 public.key
 And put these on your web server, somewhere outside the web root. Add the following lines in your `mysite/_config/config.yml`, updating the privateKey and publicKey to point to the key file (relative to the Silverstripe root), and adding an encryption key (which you might generate with `php -r 'echo base64_encode(random_bytes(32)), PHP_EOL;'`).
 
 ```
-IanSimpson\OauthServerController:
+IanSimpson\OAuth2\OauthServerController:
   privateKey: '../private.key'
   publicKey: '../public.key'
   encryptionKey: ''
@@ -48,7 +48,7 @@ Finally, after doing a `/dev/build/` go into your site settings and on the OAuth
 To verify the Authorization header being submitted is correct, add this to your Controller:
 
 ```
-$member = IanSimpson\OauthServerController::getMember($this);
+$member = IanSimpson\OAuth2\OauthServerController::getMember($this);
 ```
 
 it will return a Member object if the Authorization header is correct, or false if there's an error. Simple!

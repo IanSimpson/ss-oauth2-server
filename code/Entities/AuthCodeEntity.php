@@ -69,7 +69,7 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 	}
 
     public function addScope(ScopeEntityInterface $scope) {
-    	$this->ScopeEntities->push($scope);
+		$this->ScopeEntities()->push($scope);
     }
 
 	public function setScopes($scopes) {

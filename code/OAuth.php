@@ -8,6 +8,7 @@
 
 	Use IanSimpson\Entities;
 	Use IanSimpson\Repositories;
+	use League\OAuth2\Server\Exception\OAuthServerException;
 
 	class OauthServerController extends \Controller {
 

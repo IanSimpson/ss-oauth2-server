@@ -69,7 +69,7 @@ class AccessTokenEntity extends \DataObject implements AccessTokenEntityInterfac
 	}
 
     public function addScope(ScopeEntityInterface $scope) {
-    	$this->ScopeEntities->push($scope);
+		$this->ScopeEntities()->push($scope);
     }
 
 	public function setScopes($scopes) {

@@ -12,9 +12,6 @@ use IanSimpson\Entities\ScopeEntity;
 
 class ScopeRepository implements ScopeRepositoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getScopeEntityByIdentifier($scopeIdentifier)
     {
         $scopes = ScopeEntity::get()->filter(array(
@@ -22,9 +19,10 @@ class ScopeRepository implements ScopeRepositoryInterface
         ));
 
         if (!sizeof($scopes)) {
-            return;
+            return null;
         }
 
+        /** @var ScopeEntity $scope */
         $scope = $scopes->first();
 
         return $scope;

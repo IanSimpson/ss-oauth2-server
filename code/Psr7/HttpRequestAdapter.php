@@ -3,6 +3,7 @@
 namespace IanSimpson\Psr7;
 
 use GuzzleHttp\Psr7\ServerRequest;
+use SS_HTTPRequest;
 
 /**
  * @package psr7-adapters

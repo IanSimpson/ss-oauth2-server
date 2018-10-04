@@ -9,6 +9,12 @@ namespace IanSimpson\Entities;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 
+/**
+ * @property int SiteConfigID
+ * @property string ScopeIdentifier
+ * @property string ScopeDescription
+ * @method \SiteConfig SiteConfig()
+ */
 class ScopeEntity extends \DataObject implements ScopeEntityInterface
 {
     use EntityTrait;

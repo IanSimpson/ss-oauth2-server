@@ -7,9 +7,11 @@
 namespace IanSimpson;
 
 use Config;
+use function GuzzleHttp\Psr7\stream_for;
 use IanSimpson\Entities;
 use IanSimpson\Repositories;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use Member;
 use Psr\Http\Message\ServerRequestInterface;
 
 class OauthServerController extends \Controller
@@ -131,11 +133,9 @@ class OauthServerController extends \Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (\Exception $exception) {
-
-            // Unknown exception
-            $body = new \GuzzleHttp\Psr7\Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
@@ -151,18 +151,15 @@ class OauthServerController extends \Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (\Exception $exception) {
-
-            // Unknown exception
-            $body = new \GuzzleHttp\Psr7\Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
     }
 
     /**
-     * @param $controller
      * @return bool|ServerRequestInterface
      */
     public static function authenticateRequest($controller)
@@ -188,6 +185,9 @@ class OauthServerController extends \Controller
         return $request;
     }
 
+    /**
+     * @return bool|Member
+     */
     public static function getMember($controller)
     {
         $request = self::authenticateRequest($controller);

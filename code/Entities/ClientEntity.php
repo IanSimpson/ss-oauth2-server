@@ -8,6 +8,15 @@ namespace IanSimpson\Entities;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
+/**
+ * @property int SiteConfigID
+ * @property string ClientName
+ * @property string ClientRedirectUri
+ * @property string ClientIdentifier
+ * @property string ClientSecret
+ * @method \SiteConfig SiteConfig()
+ *
+ */
 class ClientEntity extends \DataObject implements ClientEntityInterface
 {
     protected static $singular_name = 'OAuth Client';

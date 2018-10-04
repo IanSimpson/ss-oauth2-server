@@ -3,6 +3,8 @@
 namespace IanSimpson\Psr7;
 
 use Psr\Http\Message\MessageInterface;
+use SS_HTTPRequest;
+use SS_HTTPResponse;
 
 /**
  * Provides common functionality used between Request and Response objects
@@ -19,7 +21,7 @@ abstract class AbstractHttpAdapter
     /**
      * Perform a conversion from a HTTPResponse or HTTPRequest into the corresponding PSR-7 interface
      *
-     * @param  HTTPRequest|HTTPResponse $input
+     * @param  SS_HTTPRequest|SS_HTTPResponse $input
      * @return MessageInterface
      */
     abstract public function toPsr7($input);
@@ -28,7 +30,7 @@ abstract class AbstractHttpAdapter
      * Perform a conversion from a PSR-7 interface to the corresponding HTTPRequest or HTTPResponse class
      *
      * @param  MessageInterface $input
-     * @return HTTPRequest|HTTPResponse
+     * @return SS_HTTPRequest|SS_HTTPResponse
      */
     abstract public function fromPsr7($input);
 
@@ -38,7 +40,7 @@ abstract class AbstractHttpAdapter
      * This method will assign headers as a comma delimited string from the PSR-7 interface to the SilverStripe class
      *
      * @param MessageInterface         $from
-     * @param HTTPRequest|HTTPResponse $to
+     * @param SS_HTTPRequest|SS_HTTPResponse $to
      */
     public function importHeaders(MessageInterface $from, $to)
     {

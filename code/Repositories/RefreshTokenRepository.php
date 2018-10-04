@@ -22,10 +22,12 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity)
+    public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshToken)
     {
-        // Some logic to persist the refresh token in a database
-        $refreshTokenEntity->Code = $refreshTokenEntity->identifier;
+        /** @var RefreshTokenEntity $refreshTokenEntity */
+        $refreshTokenEntity = $refreshToken;
+
+        $refreshTokenEntity->Code = $refreshTokenEntity->getIdentifier();
         $refreshTokenEntity->write();
     }
 

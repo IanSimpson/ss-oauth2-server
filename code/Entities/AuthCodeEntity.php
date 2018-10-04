@@ -13,6 +13,17 @@ use League\OAuth2\Server\Entities\Traits\AuthCodeTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 
+/**
+ * @property string Code
+ * @property string Expiry
+ * @property bool Revoked
+ * @property int ClientID
+ * @property int MemberID
+ * @property \SS_List ScopeEntities
+ * @method ClientEntity Client()
+ * @method \Member Member()
+ * @method \ManyManyList ScopeEntities()
+ */
 class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 {
     use EntityTrait, TokenEntityTrait, AuthCodeTrait;
@@ -54,9 +65,12 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 
     public function getClient()
     {
-        return ClientEntity::get()->filter(array(
+        $clients = ClientEntity::get()->filter(array(
              'ID' => $this->ClientID
-        ))->first();
+        ));
+        /** @var ClientEntity $client */
+        $client = $clients->first();
+        return $client;
     }
 
 
@@ -89,6 +103,8 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 
     public function setClient(ClientEntityInterface $client)
     {
-        $this->ClientID = $client->ID;
+        /** @var ClientEntity $clientEntity */
+        $clientEntity = $client;
+        $this->ClientID = $clientEntity->ID;
     }
 }

@@ -11,9 +11,6 @@ use IanSimpson\Entities\ClientEntity;
 
 class ClientRepository implements ClientRepositoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getClientEntity($clientIdentifier, $grantType, $clientSecret = null, $mustValidateSecret = true)
     {
         $clients = ClientEntity::get()->filter(array(
@@ -22,18 +19,19 @@ class ClientRepository implements ClientRepositoryInterface
 
         // Check if client is registered
         if (!sizeof($clients)) {
-            return;
+            return null;
         }
 
+        /** @var ClientEntity $client */
         $client = $clients->first();
 
         if (
             $mustValidateSecret === true
             && $client->ClientSecret != $clientSecret
         ) {
-            return;
+            return null;
         }
-        
+
         return $client;
     }
 }

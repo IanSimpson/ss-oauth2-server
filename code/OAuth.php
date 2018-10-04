@@ -6,12 +6,18 @@
 
 namespace IanSimpson;
 
+use Config;
 use IanSimpson\Entities;
 use IanSimpson\Repositories;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use Psr\Http\Message\ServerRequestInterface;
 
 class OauthServerController extends \Controller
 {
+    private static $privateKey = '../private.key';
+    private static $publicKey = '../public.key';
+    private static $encryptionKey = '';
+
     protected $server;
     protected $myRequest;
     protected $myResponse;
@@ -32,9 +38,7 @@ class OauthServerController extends \Controller
 
     public function __construct()
     {
-        $config = $this->config();
-        $privateKey = __DIR__.'/../../'.$config->get('privateKey');
-        $encryptionKey = $config->get('encryptionKey');
+        $privateKey = __DIR__.'/../../' . $this->config()->get('privateKey');
 
         $this->myRepositories = array(
             'client'		=> new Repositories\ClientRepository(),
@@ -50,7 +54,7 @@ class OauthServerController extends \Controller
             $this->myRepositories['accessToken'],
             $this->myRepositories['scope'],
             $privateKey,
-            $encryptionKey
+            $this->config()->get('encryptionKey')
         );
 
 
@@ -157,10 +161,13 @@ class OauthServerController extends \Controller
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
     }
 
+    /**
+     * @param $controller
+     * @return bool|ServerRequestInterface
+     */
     public static function authenticateRequest($controller)
     {
-        $config = new \Config_ForClass('IanSimpson\OauthServerController');
-        $publicKey = __DIR__.'/../../'.$config->get('publicKey');
+        $publicKey = __DIR__.'/../../' . Config::inst()->get(self::class, 'publicKey');
 
         //Muting errors with @ to stop notice about key permissions
         $server = @new \League\OAuth2\Server\ResourceServer(

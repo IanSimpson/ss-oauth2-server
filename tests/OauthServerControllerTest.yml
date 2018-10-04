@@ -1,0 +1,23 @@
+Member:
+  joe:
+    ID: 999
+    Email: joe@joe.org
+IanSimpson\Entities\ClientEntity:
+  test:
+    ClientName: test
+    ClientIdentifier: 123
+    ClientSecret: 456
+IanSimpson\Entities\AuthCodeEntity:
+  test:
+    Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    Expiry: 2099-06-06 12:00:00
+    Revoked: 0
+    Member: =>Member.joe
+    Client: =>IanSimpson\Entities\ClientEntity.test
+IanSimpson\Entities\AccessTokenEntity:
+  test:
+    Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    Expiry: 2099-06-06 12:00:00
+    Revoked: 0
+    Member: =>Member.joe
+    Client: =>IanSimpson\Entities\ClientEntity.test

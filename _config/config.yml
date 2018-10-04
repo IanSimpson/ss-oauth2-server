@@ -5,7 +5,3 @@ After: framework/routes#coreroutes
 Director:
   rules:
     'oauth': 'IanSimpson\OauthServerController'
-IanSimpson\OauthServerController:
-  privateKey: '../private.key'
-  publicKey: '../public.key'
-  encryptionKey: ''

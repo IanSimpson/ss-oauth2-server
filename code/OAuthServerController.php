@@ -21,6 +21,7 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use Psr\Http\Message\ServerRequestInterface;
 use Robbie\Psr7\HttpRequestAdapter;
 use Robbie\Psr7\HttpResponseAdapter;
 use SilverStripe\Control\HTTPRequest;
@@ -32,10 +33,8 @@ use Silverstripe\Security\Security;
 
 class OauthServerController extends Controller
 {
-    private static $privateKey = '';
-
-    private static $publicKey = '';
-
+    private static $privateKey = '../private.key';
+    private static $publicKey = '../public.key';
     private static $encryptionKey = '';
 
     private static $allowed_actions = [
@@ -58,9 +57,7 @@ class OauthServerController extends Controller
 
     public function __construct()
     {
-        $config = $this->config();
-        $privateKey = Controller::join_links(BASE_PATH, $config->get('privateKey'));
-        $encryptionKey = $config->get('encryptionKey');
+        $privateKey = BASE_PATH . DIRECTORY_SEPARATOR . $this->config()->get('privateKey');
 
         $this->myRepositories = [
             'client'        => new ClientRepository(),
@@ -76,7 +73,7 @@ class OauthServerController extends Controller
             $this->myRepositories['accessToken'],
             $this->myRepositories['scope'],
             $privateKey,
-            $encryptionKey
+            $this->config()->get('encryptionKey')
         );
 
 
@@ -175,11 +172,13 @@ class OauthServerController extends Controller
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
     }
 
+    /**
+     * @param $controller
+     * @return bool|ServerRequestInterface
+     */
     public static function authenticateRequest($controller)
     {
-        $config = new Config_ForClass(static::class);
-        $publicKey = Controller::join_links(BASE_PATH, $config->get('publicKey'));
-        ;
+        $publicKey = BASE_PATH . DIRECTORY_SEPARATOR . Config::inst()->get(self::class, 'publicKey');
 
         //Muting errors with @ to stop notice about key permissions
         $server = @new ResourceServer(

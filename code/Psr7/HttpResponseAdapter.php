@@ -3,8 +3,6 @@
 namespace IanSimpson\Psr7;
 
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\ResponseInterface;
-use IanSimpson\Psr7\AbstractHttpAdapter;
 
 /**
  * @package psr7-adapters

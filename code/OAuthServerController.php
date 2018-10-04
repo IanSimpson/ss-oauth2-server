@@ -48,17 +48,13 @@ class OauthServerController extends Controller
         'access_token'      => 'accessToken',
     ];
 
-    private $repositories = [];
-
     protected $server;
+    protected $myRequest;
+    protected $myResponse;
 
     private $myRequestAdapter;
-
     private $myResponseAdapter;
-
-    protected $myRequest;
-
-    protected $myResponse;
+    private $myRepositories;
 
     public function __construct()
     {
@@ -138,6 +134,9 @@ class OauthServerController extends Controller
 
             // At this point you should redirect the user to an authorization page.
             // This form will ask the user to approve the client and the scopes requested.
+
+            // TODO Implement authorisation step. For now, authorize implicitly, this is fine if you don't use scopes,
+            // and everything falls into one global bucket, e.g. when you have only one resource endpoint.
 
             // Once the user has approved or denied the client update the status
             // (true = approved, false = denied)

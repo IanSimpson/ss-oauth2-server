@@ -51,7 +51,7 @@ class OauthServerController extends Controller
 
     private $repositories = [];
 
-    private $server;
+    protected $server;
 
     private $myRequestAdapter;
 

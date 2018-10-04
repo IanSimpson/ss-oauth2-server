@@ -1,0 +1,18 @@
+language: php
+
+services:
+  - mysql
+
+matrix:
+  include:
+    - php: 7.1
+      env: DB=MYSQL
+
+before_script:
+  - phpenv rehash
+  - composer validate
+  - composer require silverstripe/recipe-core 1.1.x-dev --no-update
+  - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
+
+script:
+  - vendor/bin/phpunit tests/

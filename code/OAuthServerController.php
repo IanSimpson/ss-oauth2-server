@@ -32,7 +32,6 @@ use Silverstripe\Security\Security;
 
 class OauthServerController extends Controller
 {
-
     private static $privateKey = '';
 
     private static $publicKey = '';
@@ -123,7 +122,6 @@ class OauthServerController extends Controller
 
     public function authorize()
     {
-
         try {
             // Validate the HTTP request and return an AuthorizationRequest object.
             $authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
@@ -181,7 +179,8 @@ class OauthServerController extends Controller
     public static function authenticateRequest($controller)
     {
         $config = new Config_ForClass(static::class);
-        $publicKey = Controller::join_links(BASE_PATH, $config->get('publicKey'));;
+        $publicKey = Controller::join_links(BASE_PATH, $config->get('publicKey'));
+        ;
 
         //Muting errors with @ to stop notice about key permissions
         $server = @new ResourceServer(

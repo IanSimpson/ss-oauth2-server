@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataExtension;
 
 class ScopeAdmin extends DataExtension
 {
-
     private static $has_many = [
         'Scopes' => ScopeEntity::class,
     ];

@@ -12,7 +12,6 @@ use IanSimpson\OAuth2\Entities\RefreshTokenEntity;
 
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
-
     public function getRefreshToken($tokenId)
     {
         $clients = RefreshTokenEntity::get()->filter([

@@ -12,7 +12,6 @@ use IanSimpson\OAuth2\Entities\AuthCodeEntity;
 
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
-
     public function getAuthCode($codeId)
     {
         $codes = AuthCodeEntity::get()->filter([

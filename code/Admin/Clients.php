@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataExtension;
 
 class ClientAdmin extends DataExtension
 {
-
     private static $has_many = [
         'Clients' => ClientEntity::class,
     ];

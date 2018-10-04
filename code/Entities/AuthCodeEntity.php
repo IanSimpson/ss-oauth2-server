@@ -89,7 +89,7 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
     public function setScopes($scopes)
     {
         $this->ScopeEntities()->removeAll();
-        foreach($scopes as $scope) {
+        foreach ($scopes as $scope) {
             $this->addScope($scope);
         }
     }

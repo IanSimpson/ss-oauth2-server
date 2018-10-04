@@ -13,7 +13,6 @@ use SilverStripe\SiteConfig\SiteConfig;
 
 class ClientEntity extends DataObject implements ClientEntityInterface
 {
-
     private static $table_name = 'OAuth_ClientEntity';
 
     private static $singular_name = 'OAuth Client';

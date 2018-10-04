@@ -7,6 +7,7 @@
 namespace IanSimpson;
 
 use Config;
+use Exception;
 use function GuzzleHttp\Psr7\stream_for;
 use IanSimpson\Entities;
 use IanSimpson\Repositories;
@@ -50,13 +51,18 @@ class OauthServerController extends \Controller
             'refreshToken'	=> new Repositories\RefreshTokenRepository(),
         );
 
+        $encryptionKey = $this->config()->get('encryptionKey');
+        if (empty($encryptionKey)) {
+            throw new Exception('OauthServerController::encryptionKey must not be empty!');
+        }
+
         //Muting errors with @ to stop notice about key permissions
         $this->server = @new \League\OAuth2\Server\AuthorizationServer(
             $this->myRepositories['client'],
             $this->myRepositories['accessToken'],
             $this->myRepositories['scope'],
             $privateKey,
-            $this->config()->get('encryptionKey')
+            $encryptionKey
         );
 
 
@@ -132,7 +138,7 @@ class OauthServerController extends \Controller
 
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->myResponse = $this->myResponse->withStatus(500)->withBody(
                 stream_for($exception->getMessage())
             );
@@ -150,7 +156,7 @@ class OauthServerController extends \Controller
         } catch (\League\OAuth2\Server\Exception\OAuthServerException $exception) {
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->myResponse = $this->myResponse->withStatus(500)->withBody(
                 stream_for($exception->getMessage())
             );
@@ -179,7 +185,7 @@ class OauthServerController extends \Controller
 
         try {
             $request = $server->validateAuthenticatedRequest($request);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return false;
         }
         return $request;

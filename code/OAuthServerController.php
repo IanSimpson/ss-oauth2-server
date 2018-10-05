@@ -66,13 +66,18 @@ class OauthServerController extends Controller
             'refreshToken'  => new RefreshTokenRepository(),
         ];
 
+        $encryptionKey = $this->config()->get('encryptionKey');
+        if (empty($encryptionKey)) {
+            throw new Exception('OauthServerController::encryptionKey must not be empty!');
+        }
+
         // Muting errors with @ to stop notice about key permissions
         $this->server = @new AuthorizationServer(
             $this->myRepositories['client'],
             $this->myRepositories['accessToken'],
             $this->myRepositories['scope'],
             $privateKey,
-            $this->config()->get('encryptionKey')
+            $encryptionKey
         );
 
 

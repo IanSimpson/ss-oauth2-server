@@ -13,10 +13,22 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Entities\Traits\AuthCodeTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ManyManyList;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\Security\Member;
 
+/**
+ * @property string Code
+ * @property string Expiry
+ * @property bool Revoked
+ * @property int ClientID
+ * @property int MemberID
+ * @property SS_List ScopeEntities
+ * @method ClientEntity Client()
+ * @method Member Member()
+ * @method ManyManyList ScopeEntities()
+ */
 class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
 {
     use EntityTrait, TokenEntityTrait, AuthCodeTrait;
@@ -45,7 +57,7 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
 
     public function getExpiryDateTime()
     {
-        return new DateTime(date('Y-m-d H:i:s', $this->Expiry));
+        return new DateTime(date('Y-m-d H:i:s', (int)$this->Expiry));
     }
 
     public function getUserIdentifier()
@@ -60,9 +72,12 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
 
     public function getClient()
     {
-        return ClientEntity::get()->filter([
-             'ID' => $this->ClientID
-        ])->first();
+        $clients = ClientEntity::get()->filter(array(
+            'ID' => $this->ClientID
+        ));
+        /** @var ClientEntity $client */
+        $client = $clients->first();
+        return $client;
     }
 
 
@@ -96,6 +111,8 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
 
     public function setClient(ClientEntityInterface $client)
     {
-        $this->ClientID = $client->ID;
+        /** @var ClientEntity $clientEntity */
+        $clientEntity = $client;
+        $this->ClientID = $clientEntity->ID;
     }
 }

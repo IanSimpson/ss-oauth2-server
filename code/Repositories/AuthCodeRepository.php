@@ -22,11 +22,12 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity)
+    public function persistNewAuthCode(AuthCodeEntityInterface $authCode)
     {
-        $authCodeEntity->Code = $authCodeEntity->identifier;
+        /** @var AuthCodeEntity $authCodeEntity */
+        $authCodeEntity = $authCode;
+        $authCodeEntity->Code = $authCodeEntity->getIdentifier();
         $authCodeEntity->write();
-        // Some logic to persist the auth code to a database
     }
 
     /**

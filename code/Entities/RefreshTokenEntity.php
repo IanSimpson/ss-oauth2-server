@@ -12,8 +12,14 @@ use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\RefreshTokenTrait;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\FieldType\DBDateTime;
 
+/**
+ * @property string Code
+ * @property string Expiry
+ * @property bool Revoked
+ * @property int AccessTokenID
+ * @method AccessTokenEntity AccessToken()
+ */
 class RefreshTokenEntity extends DataObject implements RefreshTokenEntityInterface
 {
     use RefreshTokenTrait, EntityTrait;
@@ -42,9 +48,12 @@ class RefreshTokenEntity extends DataObject implements RefreshTokenEntityInterfa
 
     public function getAccessToken()
     {
-        return AccessTokenEntity::get()->filter([
-             'ID' => $this->AccessTokenID
-        ])->first();
+        $accessTokens = AccessTokenEntity::get()->filter(array(
+            'ID' => $this->AccessTokenID
+        ));
+        /** @var AccessTokenEntity $accessToken */
+        $accessToken = $accessTokens->first();
+        return $accessToken;
     }
 
     public function setIdentifier($code)
@@ -59,6 +68,8 @@ class RefreshTokenEntity extends DataObject implements RefreshTokenEntityInterfa
 
     public function setAccessToken(AccessTokenEntityInterface $accessToken)
     {
-        $this->AccessTokenID = $accessToken->ID;
+        /** @var AccessTokenEntity $accessTokenEntity */
+        $accessTokenEntity = $accessToken;
+        $this->AccessTokenID = $accessTokenEntity->ID;
     }
 }

@@ -9,7 +9,7 @@ namespace IanSimpson\OAuth2;
 use DateInterval;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use GuzzleHttp\Psr7\Stream;
+use function GuzzleHttp\Psr7\stream_for;
 use IanSimpson\OAuth2\Entities\UserEntity;
 use IanSimpson\OAuth2\Repositories\AccessTokenRepository;
 use IanSimpson\OAuth2\Repositories\AuthCodeRepository;
@@ -26,7 +26,6 @@ use Robbie\Psr7\HttpRequestAdapter;
 use Robbie\Psr7\HttpResponseAdapter;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Config\Config_ForClass;
 use SilverStripe\Control\Controller;
 use SilverStripe\Security\Member;
 use Silverstripe\Security\Security;
@@ -145,10 +144,9 @@ class OauthServerController extends Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (Exception $exception) {
-            // Unknown exception
-            $body = new Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
@@ -163,10 +161,9 @@ class OauthServerController extends Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (Exception $exception) {
-            // Unknown exception
-            $body = new Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
@@ -199,14 +196,20 @@ class OauthServerController extends Controller
         return $request;
     }
 
+    /**
+     * @return bool|Member
+     */
     public static function getMember($controller)
     {
         $request = self::authenticateRequest($controller);
         if (!$request) {
             return false;
         }
-        return Member::get()->filter([
+        $members = Member::get()->filter([
             "ID" => $request->getAttributes()['oauth_user_id']
-        ])->first();
+        ]);
+        /** @var Member $member */
+        $member = $members->first();
+        return $member;
     }
 }

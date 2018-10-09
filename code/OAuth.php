@@ -29,6 +29,14 @@ class OauthServerController extends \Controller
     private $myResponseAdapter;
     private $myRepositories;
 
+    /**
+     * @var Authenticator classes on which to show an athentication greeting message.
+     * @config
+     */
+    private static $authenticator_classes = [
+        'MemberAuthenticator',
+    ];
+
     private static $allowed_actions = array(
         'authorize',
         'accessToken',
@@ -112,6 +120,18 @@ class OauthServerController extends \Controller
             // The auth request object can be serialized and saved into a user's session.
             if (! \Member::currentUserID()) {
                 // You will probably want to redirect the user at this point to a login endpoint.
+
+                foreach ($this->config()->authenticator_classes as $authClass) {
+                    $form = call_user_func([$authClass, 'get_login_form'], $this);
+                    $form->sessionMessage(
+                        _t(
+                            'OAuth.AUTHENTICATE_MESSAGE',
+                            'Please log in to access {originatingSite}.',
+                            ['originatingSite' => $authRequest->getClient()->ClientName]
+                        ),
+                        'good'
+                    );
+                }
 
                 return $this->redirect(
                         \Config::inst()->get('Security', 'login_url')

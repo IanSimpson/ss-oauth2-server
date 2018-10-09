@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataExtension;
 
 class ScopeAdmin extends DataExtension
 {
-
     private static $has_many = [
         'Scopes' => ScopeEntity::class,
     ];
@@ -27,11 +26,11 @@ class ScopeAdmin extends DataExtension
         $button = new GridFieldAddNewButton('toolbar-header-right');
         $button->setButtonName('Add New OAuth Scope');
         $gridFieldConfig->addComponents(
-            new GridFieldToolbarHeader(''),
+            new GridFieldToolbarHeader(),
             $button,
             new GridFieldDataColumns(),
             new GridFieldEditButton(),
-            new GridFieldDeleteAction(''),
+            new GridFieldDeleteAction(),
             new GridFieldDetailForm()
         );
 

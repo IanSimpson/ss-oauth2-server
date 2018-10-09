@@ -23,10 +23,11 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
+    public function persistNewAccessToken(AccessTokenEntityInterface $accessToken)
     {
-        // Some logic here to save the access token to a database
-        $accessTokenEntity->Code = $accessTokenEntity->identifier;
+        /** @var AccessTokenEntity $accessTokenEntity */
+        $accessTokenEntity = $accessToken;
+        $accessTokenEntity->Code = $accessTokenEntity->getIdentifier();
         $accessTokenEntity->write();
     }
 

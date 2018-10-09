@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataExtension;
 
 class ClientAdmin extends DataExtension
 {
-
     private static $has_many = [
         'Clients' => ClientEntity::class,
     ];
@@ -27,11 +26,11 @@ class ClientAdmin extends DataExtension
         $button = new GridFieldAddNewButton('toolbar-header-right');
         $button->setButtonName('Add New OAuth Client');
         $gridFieldConfig->addComponents(
-            new GridFieldToolbarHeader(''),
+            new GridFieldToolbarHeader(),
             $button,
             new GridFieldDataColumns(),
             new GridFieldEditButton(),
-            new GridFieldDeleteAction(''),
+            new GridFieldDeleteAction(),
             new GridFieldDetailForm()
         );
 

@@ -11,9 +11,17 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\RandomGenerator;
 use SilverStripe\SiteConfig\SiteConfig;
 
+/**
+ * @property int SiteConfigID
+ * @property string ClientName
+ * @property string ClientRedirectUri
+ * @property string ClientIdentifier
+ * @property string ClientSecret
+ * @method SiteConfig SiteConfig()
+ *
+ */
 class ClientEntity extends DataObject implements ClientEntityInterface
 {
-
     private static $table_name = 'OAuth_ClientEntity';
 
     private static $singular_name = 'OAuth Client';

@@ -9,7 +9,7 @@ namespace IanSimpson\OAuth2;
 use DateInterval;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use GuzzleHttp\Psr7\Stream;
+use function GuzzleHttp\Psr7\stream_for;
 use IanSimpson\OAuth2\Entities\UserEntity;
 use IanSimpson\OAuth2\Repositories\AccessTokenRepository;
 use IanSimpson\OAuth2\Repositories\AuthCodeRepository;
@@ -21,22 +21,19 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use Psr\Http\Message\ServerRequestInterface;
 use Robbie\Psr7\HttpRequestAdapter;
 use Robbie\Psr7\HttpResponseAdapter;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Config\Config_ForClass;
 use SilverStripe\Control\Controller;
 use SilverStripe\Security\Member;
 use Silverstripe\Security\Security;
 
 class OauthServerController extends Controller
 {
-
-    private static $privateKey = '';
-
-    private static $publicKey = '';
-
+    private static $privateKey = '../private.key';
+    private static $publicKey = '../public.key';
     private static $encryptionKey = '';
 
     private static $allowed_actions = [
@@ -49,23 +46,17 @@ class OauthServerController extends Controller
         'access_token'      => 'accessToken',
     ];
 
-    private $repositories = [];
-
-    private $server;
+    protected $server;
+    protected $myRequest;
+    protected $myResponse;
 
     private $myRequestAdapter;
-
     private $myResponseAdapter;
-
-    protected $myRequest;
-
-    protected $myResponse;
+    private $myRepositories;
 
     public function __construct()
     {
-        $config = $this->config();
-        $privateKey = Controller::join_links(BASE_PATH, $config->get('privateKey'));
-        $encryptionKey = $config->get('encryptionKey');
+        $privateKey = BASE_PATH . DIRECTORY_SEPARATOR . $this->config()->get('privateKey');
 
         $this->myRepositories = [
             'client'        => new ClientRepository(),
@@ -74,6 +65,11 @@ class OauthServerController extends Controller
             'authCode'      => new AuthCodeRepository(),
             'refreshToken'  => new RefreshTokenRepository(),
         ];
+
+        $encryptionKey = $this->config()->get('encryptionKey');
+        if (empty($encryptionKey)) {
+            throw new Exception('OauthServerController::encryptionKey must not be empty!');
+        }
 
         // Muting errors with @ to stop notice about key permissions
         $this->server = @new AuthorizationServer(
@@ -123,7 +119,6 @@ class OauthServerController extends Controller
 
     public function authorize()
     {
-
         try {
             // Validate the HTTP request and return an AuthorizationRequest object.
             $authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
@@ -141,6 +136,9 @@ class OauthServerController extends Controller
             // At this point you should redirect the user to an authorization page.
             // This form will ask the user to approve the client and the scopes requested.
 
+            // TODO Implement authorisation step. For now, authorize implicitly, this is fine if you don't use scopes,
+            // and everything falls into one global bucket, e.g. when you have only one resource endpoint.
+
             // Once the user has approved or denied the client update the status
             // (true = approved, false = denied)
             $authRequest->setAuthorizationApproved(true);
@@ -151,10 +149,9 @@ class OauthServerController extends Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (Exception $exception) {
-            // Unknown exception
-            $body = new Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
@@ -169,19 +166,21 @@ class OauthServerController extends Controller
             // All instances of OAuthServerException can be formatted into a HTTP response
             $this->myResponse = $exception->generateHttpResponse($this->myResponse);
         } catch (Exception $exception) {
-            // Unknown exception
-            $body = new Stream(fopen('php://temp', 'r+'));
-            $body->write($exception->getMessage());
-            $this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
         }
 
         return $this->myResponseAdapter->fromPsr7($this->myResponse);
     }
 
+    /**
+     * @param $controller
+     * @return bool|ServerRequestInterface
+     */
     public static function authenticateRequest($controller)
     {
-        $config = new Config_ForClass(static::class);
-        $publicKey = Controller::join_links(BASE_PATH, $config->get('publicKey'));;
+        $publicKey = BASE_PATH . DIRECTORY_SEPARATOR . Config::inst()->get(self::class, 'publicKey');
 
         //Muting errors with @ to stop notice about key permissions
         $server = @new ResourceServer(
@@ -202,14 +201,20 @@ class OauthServerController extends Controller
         return $request;
     }
 
+    /**
+     * @return bool|Member
+     */
     public static function getMember($controller)
     {
         $request = self::authenticateRequest($controller);
         if (!$request) {
             return false;
         }
-        return Member::get()->filter([
+        $members = Member::get()->filter([
             "ID" => $request->getAttributes()['oauth_user_id']
-        ])->first();
+        ]);
+        /** @var Member $member */
+        $member = $members->first();
+        return $member;
     }
 }

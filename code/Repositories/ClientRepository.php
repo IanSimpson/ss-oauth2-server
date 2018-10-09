@@ -22,15 +22,16 @@ class ClientRepository implements ClientRepositoryInterface
 
         // Check if client is registered
         if (!sizeof($clients)) {
-            return;
+            return null;
         }
 
+        /** @var ClientEntity $client */
         $client = $clients->first();
 
         if ($mustValidateSecret === true
             && $client->ClientSecret != $clientSecret
         ) {
-            return;
+            return null;
         }
 
         return $client;

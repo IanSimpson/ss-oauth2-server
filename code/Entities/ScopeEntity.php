@@ -11,6 +11,12 @@ use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\SiteConfig\SiteConfig;
 
+/**
+ * @property int SiteConfigID
+ * @property string ScopeIdentifier
+ * @property string ScopeDescription
+ * @method SiteConfig SiteConfig()
+ */
 class ScopeEntity extends DataObject implements ScopeEntityInterface
 {
     use EntityTrait;

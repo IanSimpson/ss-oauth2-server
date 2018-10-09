@@ -20,5 +20,10 @@
         "league/oauth2-server": "^7",
         "guzzlehttp/psr7": "^1.4",
         "robbie/psr7-adapters": "^1"
-    }
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "^5.7"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

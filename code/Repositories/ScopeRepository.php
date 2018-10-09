@@ -22,9 +22,10 @@ class ScopeRepository implements ScopeRepositoryInterface
         ]);
 
         if (!sizeof($scopes)) {
-            return;
+            return null;
         }
 
+        /** @var ScopeEntity $scope */
         $scope = $scopes->first();
 
         return $scope;
@@ -39,7 +40,6 @@ class ScopeRepository implements ScopeRepositoryInterface
         ClientEntityInterface $clientEntity,
         $userIdentifier = null
     ) {
-
         return $scopes;
     }
 }

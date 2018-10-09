@@ -99,6 +99,16 @@
 				if(! \Member::currentUserID()) {
 					// You will probably want to redirect the user at this point to a login endpoint.
 
+					$form = \MemberLoginForm::create($this, 'LoginForm');
+					$form->sessionMessage(
+						_t(
+							'OAuth.AUTHENTICATE_MESSAGE',
+							'Please login to access {originatingSite}',
+							['originatingSite' => $authRequest->getClient()->ClientName]
+						),
+						'good'
+					);
+
 					return $this->redirect(
 							\Config::inst()->get('Security', 'login_url')
 						. "?BackURL=" . urlencode($_SERVER['REQUEST_URI'])

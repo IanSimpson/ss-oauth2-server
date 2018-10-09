@@ -17,6 +17,6 @@ class UserEntity implements UserEntityInterface
      */
     public function getIdentifier()
     {
-    	return \Member::currentUserID();
+        return \Member::currentUserID();
     }
 }

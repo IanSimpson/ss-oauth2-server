@@ -4,183 +4,204 @@
  * @copyright   Copyright (c) Ian Simpson
  */
 
-	namespace IanSimpson;
+namespace IanSimpson;
 
-	Use IanSimpson\Entities;
-	Use IanSimpson\Repositories;
-	use League\OAuth2\Server\Exception\OAuthServerException;
+use Config;
+use Exception;
+use function GuzzleHttp\Psr7\stream_for;
+use IanSimpson\Entities;
+use IanSimpson\Repositories;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use Member;
+use Psr\Http\Message\ServerRequestInterface;
 
-	class OauthServerController extends \Controller {
+class OauthServerController extends \Controller
+{
+    private static $privateKey = '../private.key';
+    private static $publicKey = '../public.key';
+    private static $encryptionKey = '';
 
-		protected $server;
+    protected $server;
+    protected $myRequest;
+    protected $myResponse;
 
-		private $myRequestAdapter;
-		private $myResponseAdapter;
+    private $myRequestAdapter;
+    private $myResponseAdapter;
+    private $myRepositories;
 
-		protected $myRequest;
-		protected $myResponse;
+    private static $allowed_actions = array(
+        'authorize',
+        'accessToken',
+    );
 
-		private static $allowed_actions = array(
-			'authorize',
-			'accessToken',
-		);
+    private static $url_handlers = array(
+        'authorize' 		=> 'authorize',
+        'access_token'		=> 'accessToken',
+    );
 
-		private static $url_handlers = array(
-			'authorize' 		=> 'authorize',
-			'access_token'		=> 'accessToken',
-		);
+    public function __construct()
+    {
+        $privateKey = __DIR__.'/../../' . $this->config()->get('privateKey');
 
-		public function __construct() {
+        $this->myRepositories = array(
+            'client'		=> new Repositories\ClientRepository(),
+            'scope'			=> new Repositories\ScopeRepository(),
+            'accessToken'	=> new Repositories\AccessTokenRepository(),
+            'authCode'		=> new Repositories\AuthCodeRepository(),
+            'refreshToken'	=> new Repositories\RefreshTokenRepository(),
+        );
 
-			$config = $this->config();
-			$privateKey = __DIR__.'/../../'.$config->get('privateKey');
-			$encryptionKey = $config->get('encryptionKey');
+        $encryptionKey = $this->config()->get('encryptionKey');
+        if (empty($encryptionKey)) {
+            throw new Exception('OauthServerController::encryptionKey must not be empty!');
+        }
 
-			$this->myRepositories = array(
-				'client'		=> new Repositories\ClientRepository(),
-				'scope'			=> new Repositories\ScopeRepository(),
-				'accessToken'	=> new Repositories\AccessTokenRepository(),
-				'authCode'		=> new Repositories\AuthCodeRepository(),
-				'refreshToken'	=> new Repositories\RefreshTokenRepository(),
-			);
-
-			//Muting errors with @ to stop notice about key permissions
-			$this->server = @new \League\OAuth2\Server\AuthorizationServer(
-				$this->myRepositories['client'],
-				$this->myRepositories['accessToken'],
-				$this->myRepositories['scope'],
-				$privateKey,
-				$encryptionKey
-			);
+        //Muting errors with @ to stop notice about key permissions
+        $this->server = @new \League\OAuth2\Server\AuthorizationServer(
+            $this->myRepositories['client'],
+            $this->myRepositories['accessToken'],
+            $this->myRepositories['scope'],
+            $privateKey,
+            $encryptionKey
+        );
 
 
-			// Enable the authentication code grant on the server
-			$grant = new \League\OAuth2\Server\Grant\AuthCodeGrant(
-				$this->myRepositories['authCode'],
-				$this->myRepositories['refreshToken'],
-				new \DateInterval('PT10M') // authorization codes will expire after 10 minutes
-			);
-			$grant->setRefreshTokenTTL(new \DateInterval('P1M')); // refresh tokens will expire after 1 month
-			$this->server->enableGrantType(
-				$grant,
-				new \DateInterval('PT1H') // access tokens will expire after 1 hour
-			);
+        // Enable the authentication code grant on the server
+        $grant = new \League\OAuth2\Server\Grant\AuthCodeGrant(
+            $this->myRepositories['authCode'],
+            $this->myRepositories['refreshToken'],
+            new \DateInterval('PT10M') // authorization codes will expire after 10 minutes
+        );
+        $grant->setRefreshTokenTTL(new \DateInterval('P1M')); // refresh tokens will expire after 1 month
+        $this->server->enableGrantType(
+            $grant,
+            new \DateInterval('PT1H') // access tokens will expire after 1 hour
+        );
 
-			// Enable the refresh code grant on the server
-			$grant = new \League\OAuth2\Server\Grant\RefreshTokenGrant(
-				$this->myRepositories['refreshToken']
-			);
-			$grant->setRefreshTokenTTL(new \DateInterval('P1M')); // new refresh tokens will expire after 1 month
-			$this->server->enableGrantType(
-				$grant,
-				new \DateInterval('PT1H') // new access tokens will expire after 1 hour
-			);
+        // Enable the refresh code grant on the server
+        $grant = new \League\OAuth2\Server\Grant\RefreshTokenGrant(
+            $this->myRepositories['refreshToken']
+        );
+        $grant->setRefreshTokenTTL(new \DateInterval('P1M')); // new refresh tokens will expire after 1 month
+        $this->server->enableGrantType(
+            $grant,
+            new \DateInterval('PT1H') // new access tokens will expire after 1 hour
+        );
 
-			parent::__construct();
-		}
+        parent::__construct();
+    }
 
-		public function handleRequest(\SS_HTTPRequest $request, \DataModel $model) {
-			$this->myRequestAdapter = new Psr7\HttpRequestAdapter();
-			$this->myRequest = $this->myRequestAdapter->toPsr7($request);
+    public function handleRequest(\SS_HTTPRequest $request, \DataModel $model)
+    {
+        $this->myRequestAdapter = new Psr7\HttpRequestAdapter();
+        $this->myRequest = $this->myRequestAdapter->toPsr7($request);
 
-			$this->myResponseAdapter = new Psr7\HttpResponseAdapter();
-			$this->myResponse = $this->myResponseAdapter->toPsr7($this->getResponse());
+        $this->myResponseAdapter = new Psr7\HttpResponseAdapter();
+        $this->myResponse = $this->myResponseAdapter->toPsr7($this->getResponse());
 
-			return parent::handleRequest($request,$model);
-		}
+        return parent::handleRequest($request, $model);
+    }
 
-		public function authorize() {
-			try {
+    public function authorize()
+    {
+        try {
 
-				// Validate the HTTP request and return an AuthorizationRequest object.
-				$authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
+            // Validate the HTTP request and return an AuthorizationRequest object.
+            $authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
 
-				// The auth request object can be serialized and saved into a user's session.
-				if(! \Member::currentUserID()) {
-					// You will probably want to redirect the user at this point to a login endpoint.
+            // The auth request object can be serialized and saved into a user's session.
+            if (! \Member::currentUserID()) {
+                // You will probably want to redirect the user at this point to a login endpoint.
 
-					return $this->redirect(
-							\Config::inst()->get('Security', 'login_url')
-						. "?BackURL=" . urlencode($_SERVER['REQUEST_URI'])
-					);
-				}
+                return $this->redirect(
+                        \Config::inst()->get('Security', 'login_url')
+                    . "?BackURL=" . urlencode($_SERVER['REQUEST_URI'])
+                );
+            }
 
-				// Once the user has logged in set the user on the AuthorizationRequest
-				$authRequest->setUser(new Entities\UserEntity()); // an instance of UserEntityInterface
+            // Once the user has logged in set the user on the AuthorizationRequest
+            $authRequest->setUser(new Entities\UserEntity()); // an instance of UserEntityInterface
 
-				// At this point you should redirect the user to an authorization page.
-				// This form will ask the user to approve the client and the scopes requested.
+            // At this point you should redirect the user to an authorization page.
+            // This form will ask the user to approve the client and the scopes requested.
 
-				// Once the user has approved or denied the client update the status
-				// (true = approved, false = denied)
-				$authRequest->setAuthorizationApproved(true);
+            // TODO Implement authorisation step. For now, authorize implicitly, this is fine if you don't use scopes,
+            // and everything falls into one global bucket, e.g. when you have only one resource endpoint.
 
-				// Return the HTTP redirect response
-				$this->myResponse = $this->server->completeAuthorizationRequest($authRequest, $this->myResponse);
+            // Once the user has approved or denied the client update the status
+            // (true = approved, false = denied)
+            $authRequest->setAuthorizationApproved(true);
 
-			} catch (OAuthServerException $exception) {
+            // Return the HTTP redirect response
+            $this->myResponse = $this->server->completeAuthorizationRequest($authRequest, $this->myResponse);
+        } catch (OAuthServerException $exception) {
 
-				// All instances of OAuthServerException can be formatted into a HTTP response
-				$this->myResponse = $exception->generateHttpResponse($this->myResponse);
+            // All instances of OAuthServerException can be formatted into a HTTP response
+            $this->myResponse = $exception->generateHttpResponse($this->myResponse);
+        } catch (Exception $exception) {
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
+        }
 
-			} catch (\Exception $exception) {
+        return $this->myResponseAdapter->fromPsr7($this->myResponse);
+    }
 
-				// Unknown exception
-				$body = new \GuzzleHttp\Psr7\Stream(fopen('php://temp', 'r+'));
-				$body->write($exception->getMessage());
-				$this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
-			}
+    public function accessToken()
+    {
+        try {
 
-			return $this->myResponseAdapter->fromPsr7($this->myResponse);
-		}
+            // Try to respond to the request
+            $this->myResponse = $this->server->respondToAccessTokenRequest($this->myRequest, $this->myResponse);
+        } catch (\League\OAuth2\Server\Exception\OAuthServerException $exception) {
+            // All instances of OAuthServerException can be formatted into a HTTP response
+            $this->myResponse = $exception->generateHttpResponse($this->myResponse);
+        } catch (Exception $exception) {
+            $this->myResponse = $this->myResponse->withStatus(500)->withBody(
+                stream_for($exception->getMessage())
+            );
+        }
 
-		public function accessToken() {
-			try {
+        return $this->myResponseAdapter->fromPsr7($this->myResponse);
+    }
 
-				// Try to respond to the request
-				$this->myResponse = $this->server->respondToAccessTokenRequest($this->myRequest, $this->myResponse);
+    /**
+     * @return bool|ServerRequestInterface
+     */
+    public static function authenticateRequest($controller)
+    {
+        $publicKey = __DIR__.'/../../' . Config::inst()->get(self::class, 'publicKey');
 
-			} catch (\League\OAuth2\Server\Exception\OAuthServerException $exception) {
-				// All instances of OAuthServerException can be formatted into a HTTP response
-        		$this->myResponse = $exception->generateHttpResponse($this->myResponse);
+        //Muting errors with @ to stop notice about key permissions
+        $server = @new \League\OAuth2\Server\ResourceServer(
+            new Repositories\AccessTokenRepository(),
+            $publicKey
+        );
+        $request = \GuzzleHttp\Psr7\ServerRequest::fromGlobals();
+        $auth = $request->getHeader('Authorization');
+        if ((!$auth || !sizeof($auth)) && $_SERVER['AUTHORIZATION']) {
+            $request = $request->withAddedHeader('Authorization', $_SERVER['AUTHORIZATION']);
+        }
 
-			} catch (\Exception $exception) {
+        try {
+            $request = $server->validateAuthenticatedRequest($request);
+        } catch (Exception $exception) {
+            return false;
+        }
+        return $request;
+    }
 
-				// Unknown exception
-				$body = new \GuzzleHttp\Psr7\Stream(fopen('php://temp', 'r+'));
-				$body->write($exception->getMessage());
-				$this->myResponse = $this->myResponse->withStatus(500)->withBody($body);
-			}
-
-			return $this->myResponseAdapter->fromPsr7($this->myResponse);
-		}
-
-		public static function authenticateRequest($controller) {
-			$config = new \Config_ForClass('IanSimpson\OauthServerController');
-			$publicKey = __DIR__.'/../../'.$config->get('publicKey');
-
-			//Muting errors with @ to stop notice about key permissions
-			$server = @new \League\OAuth2\Server\ResourceServer(
-				new Repositories\AccessTokenRepository(),
-				$publicKey
-			);
-			$request = \GuzzleHttp\Psr7\ServerRequest::fromGlobals();
-			$auth = $request->getHeader('Authorization');
-			if((!$auth || !sizeof($auth)) && $_SERVER['AUTHORIZATION']) $request = $request->withAddedHeader('Authorization',$_SERVER['AUTHORIZATION']);
-
-			try {
-				$request = $server->validateAuthenticatedRequest($request);
-			} catch (\Exception $exception) {
-				return false;
-			}
-			return $request;
-		}
-
-		public static function getMember($controller) {
-			$request = self::authenticateRequest($controller);
-			if(!$request) return false;
-			return \Member::get()->filter(array(
-				"ID" => $request->getAttributes()['oauth_user_id']
-			))->first();
-		}
-	}
+    /**
+     * @return bool|Member
+     */
+    public static function getMember($controller)
+    {
+        $request = self::authenticateRequest($controller);
+        if (!$request) {
+            return false;
+        }
+        return \Member::get()->filter(array(
+            "ID" => $request->getAttributes()['oauth_user_id']
+        ))->first();
+    }
+}

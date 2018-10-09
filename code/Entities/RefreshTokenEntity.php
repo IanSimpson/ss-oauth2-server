@@ -11,45 +11,63 @@ use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\RefreshTokenTrait;
 
+/**
+ * @property string Code
+ * @property string Expiry
+ * @property bool Revoked
+ * @property int AccessTokenID
+ * @method AccessTokenEntity AccessToken()
+ */
 class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterface
 {
     use RefreshTokenTrait, EntityTrait;
 
-	public static $db = array(
-		'Code' => 'Text',
-		'Expiry' => 'SS_Datetime',
-		'Revoked' => 'Boolean',
-	);
+    public static $db = array(
+        'Code' => 'Text',
+        'Expiry' => 'SS_Datetime',
+        'Revoked' => 'Boolean',
+    );
 
-	public static $has_one = array(
-		'AccessToken' => 'IanSimpson\Entities\AccessTokenEntity',
-	);
+    public static $has_one = array(
+        'AccessToken' => 'IanSimpson\Entities\AccessTokenEntity',
+    );
 
-	public function getIdentifier() {
-		return $this->Code;
-	}
+    public function getIdentifier()
+    {
+        return $this->Code;
+    }
 
-	public function getExpiryDateTime() {
-		return new \DateTime( (string) $this->Expiry );
-	}
+    public function getExpiryDateTime()
+    {
+        return new \DateTime((string) $this->Expiry);
+    }
 
-	public function getAccessToken() {
-		return AccessTokenEntity::get()->filter(array(
-			 'ID' => $this->AccessTokenID
-		))->first();
-	}
+    public function getAccessToken()
+    {
+        $accessTokens = AccessTokenEntity::get()->filter(array(
+             'ID' => $this->AccessTokenID
+        ));
+        /** @var AccessTokenEntity $accessToken */
+        $accessToken = $accessTokens->first();
+        return $accessToken;
+    }
 
 
-	public function setIdentifier($code) {
-		$this->Code = $code;
-	}
+    public function setIdentifier($code)
+    {
+        $this->Code = $code;
+    }
 
-	public function setExpiryDateTime(\DateTime $expiry) {
-		$this->Expiry = new \SS_Datetime;
-		$this->Expiry->setValue( $expiry->getTimestamp() );
-	}
+    public function setExpiryDateTime(\DateTime $expiry)
+    {
+        $this->Expiry = new \SS_Datetime;
+        $this->Expiry->setValue($expiry->getTimestamp());
+    }
 
-	public function setAccessToken(AccessTokenEntityInterface $accessToken) {
-		$this->AccessTokenID = $accessToken->ID;
-	}
+    public function setAccessToken(AccessTokenEntityInterface $accessToken)
+    {
+        /** @var AccessTokenEntity $accessTokenEntity */
+        $accessTokenEntity = $accessToken;
+        $this->AccessTokenID = $accessTokenEntity->ID;
+    }
 }

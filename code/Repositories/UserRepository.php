@@ -6,13 +6,19 @@
 
 namespace IanSimpson\Repositories;
 
+use Exception;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
-use IanSimpson\Entities\UserEntity;
 
 class UserRepository implements UserRepositoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
+    public function getUserEntityByUserCredentials(
+        $username,
+        $password,
+        $grantType,
+        ClientEntityInterface $clientEntity
+    )
+    {
+        throw new Exception('Unsupported yet');
+    }
 }

@@ -27,6 +27,7 @@ use Robbie\Psr7\HttpResponseAdapter;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Controller;
+use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
 use Silverstripe\Security\Security;
 
@@ -126,6 +127,15 @@ class OauthServerController extends Controller
             // The auth request object can be serialized and saved into a user's session.
             if (!Member::currentUserID()) {
                 // You will probably want to redirect the user at this point to a login endpoint.
+
+                Security::singleton()->setSessionMessage(
+                    _t(
+                        'OAuth.AUTHENTICATE_MESSAGE',
+                        'Please log in to access {originatingSite}.',
+                        ['originatingSite' => $authRequest->getClient()->ClientName]
+                    ),
+                    ValidationResult::TYPE_GOOD
+                );
 
                 return $this->redirect(Config::inst()->get(Security::class, 'login_url') . "?BackURL=" . urlencode($_SERVER['REQUEST_URI']));
             }

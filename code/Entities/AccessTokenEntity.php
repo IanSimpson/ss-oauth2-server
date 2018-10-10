@@ -57,7 +57,10 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
 
     public function getExpiryDateTime()
     {
-        return new DateTime(date('Y-m-d H:i:s', (int)$this->Expiry));
+        $date = new DateTime();
+        $date->setTimestamp((int) $this->Expiry);
+
+        return $date;
     }
 
     public function getUserIdentifier()

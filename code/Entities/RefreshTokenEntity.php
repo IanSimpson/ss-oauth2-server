@@ -43,7 +43,10 @@ class RefreshTokenEntity extends DataObject implements RefreshTokenEntityInterfa
 
     public function getExpiryDateTime()
     {
-        return new DateTime((string) $this->Expiry);
+        $date = new DateTime();
+        $date->setTimestamp((int) $this->Expiry);
+
+        return $date;
     }
 
     public function getAccessToken()

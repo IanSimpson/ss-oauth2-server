@@ -7,6 +7,9 @@ IanSimpson\Entities\ClientEntity:
     ClientName: test
     ClientIdentifier: 123
     ClientSecret: 456
+IanSimpson\Entities\ScopeEntity:
+  test:
+    ScopeIdentifier: read_profile
 IanSimpson\Entities\AuthCodeEntity:
   test:
     Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -14,6 +17,7 @@ IanSimpson\Entities\AuthCodeEntity:
     Revoked: 0
     Member: =>Member.joe
     Client: =>IanSimpson\Entities\ClientEntity.test
+    ScopeEntities: =>IanSimpson\Entities\ScopeEntity.test
 IanSimpson\Entities\AccessTokenEntity:
   test:
     Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -21,3 +25,4 @@ IanSimpson\Entities\AccessTokenEntity:
     Revoked: 0
     Member: =>Member.joe
     Client: =>IanSimpson\Entities\ClientEntity.test
+    ScopeEntities: =>IanSimpson\Entities\ScopeEntity.test

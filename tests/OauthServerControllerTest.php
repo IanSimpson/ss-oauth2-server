@@ -3,6 +3,7 @@
 namespace IanSimpson\Tests;
 
 use Config;
+use Injector;
 use FunctionalTest;
 use function GuzzleHttp\Psr7\parse_query;
 use IanSimpson\Entities\AccessTokenEntity;
@@ -17,6 +18,7 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
+use Monolog\Logger;
 
 class OauthServerControllerTest extends FunctionalTest
 {
@@ -26,8 +28,13 @@ class OauthServerControllerTest extends FunctionalTest
 
     protected $autoFollowRedirection = false;
 
-    public function setUp() {
+    private $logger;
+
+    public function setUp()
+    {
         parent::setUp();
+
+        Config::nest();
 
         $_SERVER['SERVER_PORT'] = 80;
 
@@ -39,6 +46,19 @@ class OauthServerControllerTest extends FunctionalTest
 
         chmod(__DIR__ . '/test.key', 0600);
         chmod(__DIR__ . '/test.crt', 0600);
+
+        $this->logger = $this->getMockBuilder(Logger::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        Injector::inst()->registerService($this->logger, 'Logger');
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        Config::unnest();
     }
 
     public function testAuthorize()
@@ -48,8 +68,14 @@ class OauthServerControllerTest extends FunctionalTest
         $m = $this->objFromFixture('Member', 'joe');
         $this->session()->inst_set('loggedInAs', $m->ID);
 
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->equalTo(
+                'joe@joe.org authorised test (123) to access scopes "read_profile" on their behalf'
+            ));
+
         $resp = $this->get(sprintf(
-            'oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&state=%s',
+            'oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=read_profile&state=%s',
             $c->ClientIdentifier,
             urlencode('http://client/callback'),
             $state

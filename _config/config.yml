@@ -5,3 +5,7 @@ After: framework/routes#coreroutes
 Director:
   rules:
     'oauth': 'IanSimpson\OauthServerController'
+Injector:
+  Logger:
+    class: 'Logger'
+    factory: 'IanSimpson\LogFactory'

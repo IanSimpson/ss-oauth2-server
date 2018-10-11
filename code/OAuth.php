@@ -8,11 +8,12 @@ namespace IanSimpson;
 
 use Config;
 use Exception;
+use Injector;
+use Member;
 use function GuzzleHttp\Psr7\stream_for;
 use IanSimpson\Entities;
 use IanSimpson\Repositories;
 use League\OAuth2\Server\Exception\OAuthServerException;
-use Member;
 use Psr\Http\Message\ServerRequestInterface;
 
 class OauthServerController extends \Controller
@@ -28,6 +29,11 @@ class OauthServerController extends \Controller
     private $myRequestAdapter;
     private $myResponseAdapter;
     private $myRepositories;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var Authenticator classes on which to show an athentication greeting message.
@@ -96,6 +102,8 @@ class OauthServerController extends \Controller
             new \DateInterval('PT1H') // new access tokens will expire after 1 hour
         );
 
+        $this->logger = Injector::inst()->get('Logger');
+
         parent::__construct();
     }
 
@@ -116,9 +124,11 @@ class OauthServerController extends \Controller
 
             // Validate the HTTP request and return an AuthorizationRequest object.
             $authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
+            $client = $authRequest->getClient();
+            $member = Member::currentUser();
 
             // The auth request object can be serialized and saved into a user's session.
-            if (! \Member::currentUserID()) {
+            if (!$member || !$member->exists()) {
                 // You will probably want to redirect the user at this point to a login endpoint.
 
                 foreach ($this->config()->authenticator_classes as $authClass) {
@@ -127,7 +137,7 @@ class OauthServerController extends \Controller
                         _t(
                             'OAuth.AUTHENTICATE_MESSAGE',
                             'Please log in to access {originatingSite}.',
-                            ['originatingSite' => $authRequest->getClient()->ClientName]
+                            ['originatingSite' => $client->ClientName]
                         ),
                         'good'
                     );
@@ -151,6 +161,16 @@ class OauthServerController extends \Controller
             // Once the user has approved or denied the client update the status
             // (true = approved, false = denied)
             $authRequest->setAuthorizationApproved(true);
+
+            $this->logger->info(sprintf(
+                '%s authorised %s (%s) to access scopes "%s" on their behalf',
+                $member->Email,
+                $client->ClientName,
+                $client->ClientIdentifier,
+                implode(', ', array_map(function($entity) {
+                    return $entity->ScopeIdentifier;
+                }, $authRequest->getScopes()))
+            ));
 
             // Return the HTTP redirect response
             $this->myResponse = $this->server->completeAuthorizationRequest($authRequest, $this->myResponse);

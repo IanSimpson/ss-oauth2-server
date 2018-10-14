@@ -14,7 +14,9 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
+use Monolog\Logger;
 
 class OauthServerControllerTest extends FunctionalTest
 {
@@ -24,8 +26,13 @@ class OauthServerControllerTest extends FunctionalTest
 
     protected $autoFollowRedirection = false;
 
-    public function setUp() {
+    private $logger;
+
+    protected function setUp()
+    {
         parent::setUp();
+
+        Config::nest();
 
         $_SERVER['SERVER_PORT'] = 80;
 
@@ -40,6 +47,19 @@ class OauthServerControllerTest extends FunctionalTest
 
         chmod(__DIR__ . '/test.key', 0600);
         chmod(__DIR__ . '/test.crt', 0600);
+
+        $this->logger = $this->getMockBuilder(Logger::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        Injector::inst()->registerService($this->logger, 'IanSimpson\\OAuth2\\Logger');
+    }
+
+    protected function tearDown()
+    {
+        Config::unnest();
+
+        parent::tearDown();
     }
 
     public function testAuthorize()
@@ -49,8 +69,14 @@ class OauthServerControllerTest extends FunctionalTest
         $m = $this->objFromFixture('Member', 'joe');
         $this->logInAs($m->ID);
 
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->equalTo(
+                'joe@joe.org authorised test (123) to access scopes "read_profile" on their behalf'
+            ));
+
         $resp = $this->get(sprintf(
-            'http://localhost/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&state=%s',
+            'http://localhost/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=read_profile&state=%s',
             $c->ClientIdentifier,
             urlencode('http://client/callback'),
             $state

@@ -26,6 +26,7 @@ use Robbie\Psr7\HttpRequestAdapter;
 use Robbie\Psr7\HttpResponseAdapter;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Control\Controller;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
@@ -54,6 +55,11 @@ class OauthServerController extends Controller
     private $myRequestAdapter;
     private $myResponseAdapter;
     private $myRepositories;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
 
     public function __construct()
     {
@@ -104,6 +110,8 @@ class OauthServerController extends Controller
             new DateInterval('PT1H') // new access tokens will expire after 1 hour
         );
 
+        $this->logger = Injector::inst()->get('IanSimpson\\OAuth2\\Logger');
+
         parent::__construct();
     }
 
@@ -123,16 +131,18 @@ class OauthServerController extends Controller
         try {
             // Validate the HTTP request and return an AuthorizationRequest object.
             $authRequest = $this->server->validateAuthorizationRequest($this->myRequest);
+            $client = $authRequest->getClient();
+            $member = Security::getCurrentUser();
 
             // The auth request object can be serialized and saved into a user's session.
-            if (!Member::currentUserID()) {
+            if (!$member || !$member->exists()) {
                 // You will probably want to redirect the user at this point to a login endpoint.
 
                 Security::singleton()->setSessionMessage(
                     _t(
                         'OAuth.AUTHENTICATE_MESSAGE',
                         'Please log in to access {originatingSite}.',
-                        ['originatingSite' => $authRequest->getClient()->ClientName]
+                        ['originatingSite' => $client->ClientName]
                     ),
                     ValidationResult::TYPE_GOOD
                 );
@@ -152,6 +162,16 @@ class OauthServerController extends Controller
             // Once the user has approved or denied the client update the status
             // (true = approved, false = denied)
             $authRequest->setAuthorizationApproved(true);
+
+            $this->logger->info(sprintf(
+                '%s authorised %s (%s) to access scopes "%s" on their behalf',
+                $member->Email,
+                $client->ClientName,
+                $client->ClientIdentifier,
+                implode(', ', array_map(function($entity) {
+                    return $entity->ScopeIdentifier;
+                }, $authRequest->getScopes()))
+            ));
 
             // Return the HTTP redirect response
             $this->myResponse = $this->server->completeAuthorizationRequest($authRequest, $this->myResponse);

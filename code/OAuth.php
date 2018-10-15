@@ -102,7 +102,7 @@ class OauthServerController extends \Controller
             new \DateInterval('PT1H') // new access tokens will expire after 1 hour
         );
 
-        $this->logger = Injector::inst()->get('Logger');
+        $this->logger = Injector::inst()->get('OAuthLogger');
 
         parent::__construct();
     }

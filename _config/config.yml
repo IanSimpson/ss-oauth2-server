@@ -6,5 +6,5 @@ Director:
   rules:
     'oauth': 'IanSimpson\OauthServerController'
 Injector:
-  Logger:
+  OAuthLogger:
     factory: 'IanSimpson\LogFactory'

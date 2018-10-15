@@ -7,5 +7,4 @@ Director:
     'oauth': 'IanSimpson\OauthServerController'
 Injector:
   Logger:
-    class: 'Logger'
     factory: 'IanSimpson\LogFactory'

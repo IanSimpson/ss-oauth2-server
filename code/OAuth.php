@@ -33,7 +33,7 @@ class OauthServerController extends \Controller
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    protected $logger;
 
     /**
      * @var Authenticator classes on which to show an athentication greeting message.

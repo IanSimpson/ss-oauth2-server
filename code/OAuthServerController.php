@@ -59,7 +59,7 @@ class OauthServerController extends Controller
     /**
      * @var \Psr\Log\LoggerInterface
      */
-    private $logger;
+    protected $logger;
 
     public function __construct()
     {

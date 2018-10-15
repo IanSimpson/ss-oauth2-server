@@ -7,6 +7,9 @@ IanSimpson\OAuth2\Entities\ClientEntity:
     ClientName: test
     ClientIdentifier: 123
     ClientSecret: 456
+IanSimpson\OAuth2\Entities\ScopeEntity:
+  test:
+    ScopeIdentifier: read_profile
 IanSimpson\OAuth2\Entities\AuthCodeEntity:
   test:
     Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -14,6 +17,7 @@ IanSimpson\OAuth2\Entities\AuthCodeEntity:
     Revoked: 0
     Member: =>Member.joe
     Client: =>IanSimpson\OAuth2\Entities\ClientEntity.test
+    ScopeEntities: =>IanSimpson\OAuth2\Entities\ScopeEntity.test
 IanSimpson\OAuth2\Entities\AccessTokenEntity:
   test:
     Code: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -21,3 +25,4 @@ IanSimpson\OAuth2\Entities\AccessTokenEntity:
     Revoked: 0
     Member: =>Member.joe
     Client: =>IanSimpson\OAuth2\Entities\ClientEntity.test
+    ScopeEntities: =>IanSimpson\OAuth2\Entities\ScopeEntity.test

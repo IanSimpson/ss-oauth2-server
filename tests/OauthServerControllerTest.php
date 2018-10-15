@@ -51,7 +51,7 @@ class OauthServerControllerTest extends FunctionalTest
             ->disableOriginalConstructor()
             ->getMock();
 
-        Injector::inst()->registerService($this->logger, 'Logger');
+        Injector::inst()->registerService($this->logger, 'OAuthLogger');
     }
 
     public function tearDown()

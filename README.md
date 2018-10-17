@@ -32,13 +32,21 @@ chmod 600 private.key
 chmod 600 public.key
 ```
 
-And put these on your web server, somewhere outside the web root. Add the following lines in your `mysite/_config/config.yml`, updating the privateKey and publicKey to point to the key file (relative to the Silverstripe root), and adding an encryption key (which you might generate with `php -r 'echo base64_encode(random_bytes(32)), PHP_EOL;'`).
+Put these on your web server, somewhere outside the web root
+
+Generate encryption key:
+
+```
+php -r 'echo base64_encode(random_bytes(32)), PHP_EOL;'
+```
+
+Add the following lines in your `mysite/_config/config.yml`, updating the privateKey and publicKey to point to the key files (relative to the SilverStripe root), and adding the encryption key you have just generated:
 
 ```
 IanSimpson\OAuth2\OauthServerController:
   privateKey: '../private.key'
   publicKey: '../public.key'
-  encryptionKey: ''
+  encryptionKey: 'l4kZ/YXA1HJp7vLjB7IeDsIR3GEy6Kojfr+N+UalwkU= # example only, generate your own.'
 ```
 
 Finally, after doing a `/dev/build/` go into your site settings and on the OAuth Configuration and add a new Client. Using this you should now be able to generate a key at `/oauth/authorize`, per the OAuth 2.0 spec (https://tools.ietf.org/html/rfc6749).

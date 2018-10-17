@@ -26,7 +26,7 @@ composer require iansimpson/ss-oauth2-server
 Next, generate a private/public key pair:
 
 ```
-openssl genrsa -out private.key 1024
+openssl genrsa -out private.key 2048
 openssl rsa -in private.key -pubout -out public.key
 chmod 600 private.key
 chmod 600 public.key

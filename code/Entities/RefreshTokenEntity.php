@@ -22,13 +22,13 @@ class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterf
 {
     use RefreshTokenTrait, EntityTrait;
 
-    public static $db = array(
+    private static $db = array(
         'Code' => 'Text',
         'Expiry' => 'SS_Datetime',
         'Revoked' => 'Boolean',
     );
 
-    public static $has_one = array(
+    private static $has_one = array(
         'AccessToken' => 'IanSimpson\Entities\AccessTokenEntity',
     );
 
@@ -51,7 +51,6 @@ class RefreshTokenEntity extends \DataObject implements RefreshTokenEntityInterf
         $accessToken = $accessTokens->first();
         return $accessToken;
     }
-
 
     public function setIdentifier($code)
     {

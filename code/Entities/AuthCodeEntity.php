@@ -28,18 +28,18 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
 {
     use EntityTrait, TokenEntityTrait, AuthCodeTrait;
 
-    public static $db = array(
+    private static $db = array(
         'Code' => 'Text',
         'Expiry' => 'SS_Datetime',
         'Revoked' => 'Boolean',
     );
 
-    public static $has_one = array(
+    private static $has_one = array(
         'Client' => 'IanSimpson\Entities\ClientEntity',
         'Member' => 'Member',
     );
 
-    public static $many_many = array(
+    private static $many_many = array(
         'ScopeEntities' => 'IanSimpson\Entities\ScopeEntity',
     );
 
@@ -72,7 +72,6 @@ class AuthCodeEntity extends \DataObject implements AuthCodeEntityInterface
         $client = $clients->first();
         return $client;
     }
-
 
     public function setIdentifier($code)
     {

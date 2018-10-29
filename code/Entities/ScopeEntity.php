@@ -19,19 +19,20 @@ class ScopeEntity extends \DataObject implements ScopeEntityInterface
 {
     use EntityTrait;
 
-    protected static $singular_name = 'OAuth Scope';
-    protected static $plural_name = 'OAuth Scopes';
+    private static $singular_name = 'OAuth Scope';
 
-    public static $has_one = array(
+    private static $plural_name = 'OAuth Scopes';
+
+    private static $has_one = array(
         'SiteConfig' => 'SiteConfig'
     );
 
-    public static $db = array(
+    private static $db = array(
         'ScopeIdentifier' => 'Varchar(32)',
         'ScopeDescription' => 'Text',
     );
 
-    public static $summary_fields = array(
+    private static $summary_fields = array(
         'ScopeIdentifier',
     );
 

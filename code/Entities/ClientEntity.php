@@ -8,6 +8,7 @@ namespace IanSimpson\OAuth2\Entities;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\RandomGenerator;
 use SilverStripe\SiteConfig\SiteConfig;
 
@@ -53,6 +54,23 @@ class ClientEntity extends DataObject implements ClientEntityInterface
             'columns' => ['ClientIdentifier']
         ]
     ];
+
+    public function validate()
+    {
+        $result = ValidationResult::create();
+
+        if (strlen($this->ClientIdentifier) !== 32) {
+            $result->addError('Client identifier must be a 32 character random token.');
+        }
+        if (strlen($this->ClientSecret) !== 64) {
+            $result->addError('Client secret must be a 64 character random token.');
+        }
+        if (empty(trim($this->ClientRedirectUri))) {
+            $result->addError('Client redirect URI must be given.');
+        }
+
+        return $result;
+    }
 
     public function populateDefaults()
     {

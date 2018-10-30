@@ -19,21 +19,22 @@ use League\OAuth2\Server\Entities\ClientEntityInterface;
  */
 class ClientEntity extends \DataObject implements ClientEntityInterface
 {
-    protected static $singular_name = 'OAuth Client';
-    protected static $plural_name = 'OAuth Clients';
+    private static $singular_name = 'OAuth Client';
 
-    public static $has_one = array(
+    private static $plural_name = 'OAuth Clients';
+
+    private static $has_one = array(
         'SiteConfig' => 'SiteConfig'
     );
 
-    public static $db = array(
+    private static $db = array(
         'ClientName' => 'Varchar(100)',
         'ClientRedirectUri' => 'Varchar(100)',
         'ClientIdentifier' => 'Varchar(32)',
         'ClientSecret' => 'Varchar(64)',
     );
 
-    public static $summary_fields = array(
+    private static $summary_fields = array(
         'ClientName',
         'ClientIdentifier'
     );
@@ -58,14 +59,17 @@ class ClientEntity extends \DataObject implements ClientEntityInterface
         $this->ClientIdentifier = substr($rand->randomToken(), 0, 32);
         $this->ClientSecret = substr($rand->randomToken(), 0, 64);
     }
+
     public function getName()
     {
         return $this->ClientName;
     }
+
     public function getRedirectUri()
     {
         return $this->ClientRedirectUri;
     }
+
     public function getIdentifier()
     {
         return $this->ClientIdentifier;

@@ -6,6 +6,7 @@
 
 namespace IanSimpson\Entities;
 
+use ValidationResult;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 
 /**
@@ -49,6 +50,23 @@ class ClientEntity extends \DataObject implements ClientEntityInterface
             'value' => '"ClientIdentifier"',
         ),
     );
+
+    protected function validate()
+    {
+        $result = ValidationResult::create();
+
+        if (strlen($this->ClientIdentifier) !== 32) {
+            $result->error('Client identifier must be a 32 character random token.');
+        }
+        if (strlen($this->ClientSecret) !== 64) {
+            $result->error('Client secret must be a 64 character random token.');
+        }
+        if (empty(trim($this->ClientRedirectUri))) {
+            $result->error('Client redirect URI must be given.');
+        }
+
+        return $result;
+    }
 
     public function populateDefaults()
     {

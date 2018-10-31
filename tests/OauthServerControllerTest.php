@@ -14,7 +14,7 @@ use IanSimpson\Repositories\AccessTokenRepository;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Key;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
+use Lcobucci\JWT\Signer\Ecdsa\Sha512;
 use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
@@ -153,7 +153,7 @@ class OauthServerControllerTest extends FunctionalTest
             ->setExpiration(strtotime($at->Expiry))
             ->setSubject($m->ID)
             ->set('scopes', [])
-            ->sign(new Sha256(), new Key(file_get_contents(__DIR__ . '/test.key')))
+            ->sign(new Sha512(), new Key(file_get_contents(__DIR__ . '/test.key')))
             ->getToken();
 
         $_SERVER['AUTHORIZATION'] = sprintf('Bearer %s', $jwt);
@@ -170,7 +170,7 @@ class OauthServerControllerTest extends FunctionalTest
     {
         $pk = new CryptKey(__DIR__ . '/test.crt');
         $token = (new Parser())->parse($jwt);
-        return $token->verify(new Sha256(), $pk->getKeyPath());
+        return $token->verify(new Sha512(), $pk->getKeyPath());
     }
 
     private function tokenGetClaims($jwt)

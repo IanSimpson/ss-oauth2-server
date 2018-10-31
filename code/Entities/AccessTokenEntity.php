@@ -6,6 +6,10 @@
 
 namespace IanSimpson\Entities;
 
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Key;
+use Lcobucci\JWT\Signer\Ecdsa\Sha512;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -42,6 +46,25 @@ class AccessTokenEntity extends \DataObject implements AccessTokenEntityInterfac
     private static $many_many = array(
         'ScopeEntities' => 'IanSimpson\Entities\ScopeEntity',
     );
+
+    /**
+     * @param CryptKey $privateKey
+     *
+     * @return string
+     */
+    public function convertToJWT(CryptKey $privateKey)
+    {
+        return (new Builder())
+            ->setAudience($this->getClient()->getIdentifier())
+            ->setId($this->getIdentifier(), true)
+            ->setIssuedAt(time())
+            ->setNotBefore(time())
+            ->setExpiration($this->getExpiryDateTime()->getTimestamp())
+            ->setSubject($this->getUserIdentifier())
+            ->set('scopes', $this->getScopes())
+            ->sign(new Sha512(), new Key($privateKey->getKeyPath(), $privateKey->getPassPhrase()))
+            ->getToken();
+    }
 
     public function getIdentifier()
     {

@@ -23,16 +23,20 @@ Install the add-on with Composer:
 composer require iansimpson/ss-oauth2-server
 ```
 
-Next, generate a private/public key pair:
+Next, generate an ECSDA private/public key pair:
 
 ```
-openssl genrsa -out private.key 1024
-openssl rsa -in private.key -pubout -out public.key
+vendor/mdanter/ecc/bin/phpecc genkey --curve nist-p521 --out pem
+```
+
+Copy the output into `private.key` and `public.key` files respectively. Then fix permissions:
+
+```
 chmod 600 private.key
 chmod 600 public.key
 ```
 
-And put these on your web server, somewhere outside the web root. Add the following lines in your `mysite/_config/config.yml`, updating the privateKey and publicKey to point to the key file (relative to the Silverstripe root), and adding an encryption key (which you might generate with `php -r 'echo base64_encode(random_bytes(32)), PHP_EOL;'`).
+And put these on your web server, somewhere outside the web root. Add the following lines in your `mysite/_config/config.yml`, updating the privateKey and publicKey to point to the key file (relative to the Silverstripe root), and adding an encryption key (which you might generate with `php -r 'echo base64_encode(random_bytes(64)), PHP_EOL;'`).
 
 ```
 IanSimpson\OauthServerController:

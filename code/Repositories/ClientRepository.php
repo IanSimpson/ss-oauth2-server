@@ -29,7 +29,7 @@ class ClientRepository implements ClientRepositoryInterface
         $client = $clients->first();
 
         if ($mustValidateSecret === true
-            && $client->ClientSecret != $clientSecret
+            && !$client->isSecretValid($clientSecret)
         ) {
             return null;
         }

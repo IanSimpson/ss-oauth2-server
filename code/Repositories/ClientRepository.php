@@ -27,7 +27,7 @@ class ClientRepository implements ClientRepositoryInterface
 
         if (
             $mustValidateSecret === true
-            && $client->ClientSecret != $clientSecret
+            && !$client->isSecretValid($clientSecret)
         ) {
             return null;
         }

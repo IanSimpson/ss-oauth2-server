@@ -10,12 +10,10 @@ use IanSimpson\Entities\AccessTokenEntity;
 use IanSimpson\Entities\AuthCodeEntity;
 use IanSimpson\Entities\ClientEntity;
 use IanSimpson\OauthServerController;
-use IanSimpson\Repositories\AccessTokenRepository;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
-use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use Monolog\Logger;
@@ -118,7 +116,8 @@ class OauthServerControllerTest extends FunctionalTest
 
         $resp = $this->post('oauth/accessToken', [
             'client_id' => $c->ClientIdentifier,
-            'client_secret' => $c->ClientSecret,
+            // Secret cannot be obtained from $c, at this point it's already hashed.
+            'client_secret' => '456',
             'code' => $authCode,
             'grant_type' => 'authorization_code',
             'redirect_uri' => $redir,

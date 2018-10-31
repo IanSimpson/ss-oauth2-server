@@ -3,28 +3,19 @@
 namespace IanSimpson\Tests;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\ORM\ValidationException;
 use IanSimpson\OAuth2\Entities\ClientEntity;
+use SilverStripe\ORM\ValidationException;
 
 class ClientEntityTest extends SapphireTest
 {
     protected $usesDatabase = true;
-
-    public function testValidateFail()
-    {
-        $this->expectException(ValidationException::class);
-
-        $e = new ClientEntity();
-        $e->write();
-    }
 
     public function testRedirectUriRequired()
     {
         $this->expectException(ValidationException::class);
 
         $e = new ClientEntity();
-        $e->ClientIdentifier = '200c0e8058c40b101724c23fac8d8ad1';
-        $e->ClientSecret = 'b8ca798ab885f49e69507cbe093972bf505a05dd9e34a6fea2d0c3c699d323c4';
+        $e->populateDefaults();
         $e->write();
     }
 
@@ -33,8 +24,7 @@ class ClientEntityTest extends SapphireTest
         $this->expectException(ValidationException::class);
 
         $e = new ClientEntity();
-        $e->ClientIdentifier = '200c0e8058c40b101724c23fac8d8ad1';
-        $e->ClientSecret = 'b8ca798ab885f49e69507cbe093972bf505a05dd9e34a6fea2d0c3c699d323c4';
+        $e->populateDefaults();
         $e->ClientRedirectUri = ' ';
         $e->write();
     }
@@ -42,9 +32,53 @@ class ClientEntityTest extends SapphireTest
     public function testValidatePass()
     {
         $e = new ClientEntity();
-        $e->ClientIdentifier = '200c0e8058c40b101724c23fac8d8ad1';
-        $e->ClientSecret = 'b8ca798ab885f49e69507cbe093972bf505a05dd9e34a6fea2d0c3c699d323c4';
+        $e->populateDefaults();
         $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
         $e->write();
+    }
+
+    public function testLegacySecretMigratesToHashed()
+    {
+        $e = new ClientEntity();
+        $e->ClientIdentifier = '123';
+        $e->ClientSecret = 'abc';
+        $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
+        $e->write();
+
+        $this->assertTrue(empty($e->ClientSecret));
+        $this->assertTrue($e->isSecretValid('abc'));
+    }
+
+    public function testSecretWorks()
+    {
+        $e = new ClientEntity();
+        $e->populateDefaults();
+
+        $secret = $e->getCMSFields()->fieldByName('Root.Main.InMemoryClientSecret')->Value();
+        $this->assertTrue(empty($e->ClientSecret));
+        $this->assertTrue($e->isSecretValid($secret));
+    }
+
+    public function testSecretIsNotAvailableAfterWriting()
+    {
+        $e = new ClientEntity();
+        $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
+        $e->populateDefaults();
+        $e->write();
+
+        $refreshed = ClientEntity::get()->byID($e->ID);
+        $secret = $refreshed->getCMSFields()->fieldByName('Root.Main.InMemoryClientSecret')->Value();
+        $this->assertEquals($secret, '<hidden>');
+    }
+
+    public function testLegacyWarningIsShown()
+    {
+        $e = new ClientEntity();
+        $e->ClientIdentifier = '123';
+        $e->ClientSecret = 'abc';
+        $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
+
+        $legacyField = $e->getCMSFields()->fieldByName('Root.Main.LegacyClientSecret');
+        $this->assertNotNull($legacyField);
     }
 }

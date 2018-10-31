@@ -119,7 +119,8 @@ class OauthServerControllerTest extends FunctionalTest
 
         $resp = $this->post('http://localhost/oauth/accessToken', [
             'client_id' => $c->ClientIdentifier,
-            'client_secret' => $c->ClientSecret,
+            // Secret cannot be obtained from $c, at this point it's already hashed.
+            'client_secret' => '456',
             'code' => $authCode,
             'grant_type' => 'authorization_code',
             'redirect_uri' => $redir,

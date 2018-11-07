@@ -51,9 +51,14 @@ class ClientEntityTest extends SapphireTest
     public function testSecretWorks()
     {
         $e = new ClientEntity();
+        $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
         $e->populateDefaults();
 
-        $secret = $e->getCMSFields()->fieldByName('Root.Main.InMemoryClientSecret')->Value();
+        $secret = $e->HashedClientSecret;
+
+        $e->write();
+
+        $this->assertNotEquals($secret, $e->HashedClientSecret);
         $this->assertTrue(empty($e->ClientSecret));
         $this->assertTrue($e->isSecretValid($secret));
     }
@@ -66,8 +71,10 @@ class ClientEntityTest extends SapphireTest
         $e->write();
 
         $refreshed = ClientEntity::get()->byID($e->ID);
-        $secret = $refreshed->getCMSFields()->fieldByName('Root.Main.InMemoryClientSecret')->Value();
-        $this->assertEquals($secret, '<hidden>');
+        $secretField = $refreshed->getCMSFields()->fieldByName('Root.Main.HashedClientSecret');
+        $this->assertNull($secretField);
+        $hiddenSecret = $refreshed->getCMSFields()->fieldByName('Root.Main.HiddenHashedClientSecret')->Value();
+        $this->assertEquals($hiddenSecret, '<hidden>');
     }
 
     public function testLegacyWarningIsShown()
@@ -77,6 +84,8 @@ class ClientEntityTest extends SapphireTest
         $e->ClientSecret = 'abc';
         $e->ClientRedirectUri = 'http://somewhere.lan/oauth2/callback';
 
+        $secret = $e->getCMSFields()->fieldByName('Root.Main.HashedClientSecret');
+        $this->assertNull($secret);
         $legacyField = $e->getCMSFields()->fieldByName('Root.Main.LegacyClientSecret');
         $this->assertNotNull($legacyField);
     }

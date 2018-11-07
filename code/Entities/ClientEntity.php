@@ -65,15 +65,9 @@ class ClientEntity extends \DataObject implements ClientEntityInterface
         ),
     );
 
-    /**
-     * @var string For passing between populateDefaults and getCMSFields.
-     */
-    private $rawSecret = '<hidden>';
-
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields->removeFieldFromTab('Root', 'HashedClientSecret');
         $fields->removeFieldFromTab('Root', 'ClientSecretSalt');
         $fields->removeFieldFromTab('Root', 'ClientSecretHashMethod');
         $fields->removeFieldFromTab('Root', 'ClientSecretHashIterations');
@@ -81,16 +75,23 @@ class ClientEntity extends \DataObject implements ClientEntityInterface
         $fields->removeFieldFromTab('Root', 'SiteConfigID');
 
         if (!empty($this->ClientSecret)) {
+            $fields->removeFieldFromTab('Root', 'HashedClientSecret');
             $legacySecret = ReadonlyField::create('LegacyClientSecret', 'Legacy client secret')
                 ->setValue('<this client secret is insecure - please save client to fix>');
             $fields->insertAfter('ClientIdentifier', $legacySecret);
         } else {
-            $secretField = ReadonlyField::create('InMemoryClientSecret', 'Client secret')
-                ->setValue($this->rawSecret);
-            if ($this->rawSecret !== '<hidden>') {
-                $secretField->setRightTitle('Please copy this securely to the client. This password will disappear from here forever after reload.');
+            if (!$this->ID && !empty(trim($this->HashedClientSecret))) {
+                // Must use existing field, otherwise loses the initial value. See note in populateDefaults below.
+                /** @var \FormField $secretField */
+                $secretField = $fields->fieldByName('Root.Main.HashedClientSecret');
+                $secretField->setTitle('Client secret');
+                $secretField->setRightTitle('Please copy this securely to the client. This password will disappear from here forever after save.');
+            } else {
+                $fields->removeFieldFromTab('Root', 'HashedClientSecret');
+                $secretField = ReadonlyField::create('HiddenHashedClientSecret', 'Client secret')
+                    ->setValue('<hidden>');
+                $fields->insertAfter('ClientIdentifier', $secretField);
             }
-            $fields->insertAfter('ClientIdentifier', $secretField);
         }
 
         return $fields;
@@ -116,14 +117,24 @@ class ClientEntity extends \DataObject implements ClientEntityInterface
     public function populateDefaults()
     {
         parent::populateDefaults();
+
         $this->ClientIdentifier = substr((new RandomGenerator())->randomToken(), 0, 32);
+
+        // There is some evil Framework magic that calls populateDefaults twice and yet still somehow
+        // manages to save into the DB the initial values. This only works for DB fields that are present
+        // in the form, otherwise the secret will change from under the user. If you check Member::onBeforeWrite,
+        // that's apparently what you are supposed to do - temporarily store unhashed value in the DB field.
         // ~330 bits of entropy (64 characters [a-z0-9]).
-        $this->rawSecret = substr((new RandomGenerator())->randomToken(), 0, 64);
-        $this->storeSafely($this->rawSecret);
+        $this->HashedClientSecret = substr((new RandomGenerator())->randomToken(), 0, 64);
     }
 
     public function onBeforeWrite()
     {
+        // Overwrite the HashedClientSecret property with the hashed value if needed.
+        if (!$this->ID && !empty(trim($this->HashedClientSecret))) {
+            $this->storeSafely($this->HashedClientSecret);
+        }
+
         // Automatically fix historical unhashed tokens.
         if (!empty(trim($this->ClientSecret))) {
             $this->storeSafely($this->ClientSecret);

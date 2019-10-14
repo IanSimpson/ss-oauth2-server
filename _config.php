@@ -1,3 +1,3 @@
 <?php
-    Object::add_extension('SiteConfig', 'IanSimpson\Admin\ClientAdmin');
-    Object::add_extension('SiteConfig', 'IanSimpson\Admin\ScopeAdmin');
+    SS_Object::add_extension('SiteConfig', 'IanSimpson\Admin\ClientAdmin');
+    SS_Object::add_extension('SiteConfig', 'IanSimpson\Admin\ScopeAdmin');

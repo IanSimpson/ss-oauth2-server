@@ -11,6 +11,10 @@ use DateInterval;
 use DateTimeImmutable;
 use Exception;
 use IanSimpson\OAuth2\OauthServerController;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Eddsa;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Token;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -20,6 +24,9 @@ use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Member;
+use Lcobucci\JWT\Builder;
+use League\OAuth2\Server\CryptKey;
+use IanSimpson\OAuth2\Utility\Utility;
 
 /**
  * @property ?string $Code
@@ -81,6 +88,37 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
     private static array $searchable_fields = [
         'Code',
     ];
+
+    /**
+     * Generate a JWT from the access token
+     *
+     * @return Token
+     */
+    public function convertToJWT()
+    {
+        // Load the PEM-encoded private key from file (e.g., this can be $this->privateKey->getKeyContents())
+        $pemPrivateKey = $this->privateKey->getKeyContents(); // Ensure this contains the PEM key
+        $sodiumPrivateKey = Utility::extractDERKeyValue($pemPrivateKey);
+        $secretkey = sodium_crypto_sign_secretkey(sodium_crypto_sign_seed_keypair($sodiumPrivateKey));
+
+        // Configure the JWT generation
+        $config = Configuration::forAsymmetricSigner(
+            new Eddsa(),
+            InMemory::plainText($secretkey),
+            InMemory::plainText('empty', 'empty')
+        );
+
+        // return the token
+        return $config->builder()
+            ->permittedFor($this->getClient()->getIdentifier())
+            ->identifiedBy($this->getIdentifier())
+            ->issuedAt(new DateTimeImmutable())
+            ->canOnlyBeUsedAfter(new DateTimeImmutable())
+            ->expiresAt($this->getExpiryDateTime())
+            ->relatedTo((string) $this->getUserIdentifier())
+            ->withClaim('scopes', $this->getScopes())
+            ->getToken($config->signer(), $config->signingKey());
+    }
 
     public function getIdentifier(): string
     {

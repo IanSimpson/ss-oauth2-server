@@ -33,6 +33,14 @@ chmod 600 private.key
 chmod 600 public.key
 ```
 
+To generate ED25519 private/public key pair:
+```shell
+openssl genpkey -algorithm Ed25519 -out private.key
+openssl pkey -in ed25519-private.key -pubout -out public.key
+chmod 600 private.key
+chmod 600 public.key
+```
+
 Put these on your web server, somewhere outside the web root
 
 Generate encryption key:

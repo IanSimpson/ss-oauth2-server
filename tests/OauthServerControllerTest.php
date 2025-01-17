@@ -12,7 +12,7 @@ use IanSimpson\OAuth2\Entities\ClientEntity;
 use IanSimpson\OAuth2\OauthServerController;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
+use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Validation\Constraint\IdentifiedBy;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
@@ -212,7 +212,7 @@ class OauthServerControllerTest extends FunctionalTest
         $this->assertNotEmpty($m->ID);
 
         $configuration = Configuration::forSymmetricSigner(
-            new Sha256(),
+            new Eddsa(),
             InMemory::file($this->privateKey)
         );
 
@@ -287,7 +287,7 @@ class OauthServerControllerTest extends FunctionalTest
         $this->assertNotEmpty($c->ClientIdentifier);
 
         $configuration = Configuration::forSymmetricSigner(
-            new Sha256(),
+            new Eddsa(),
             InMemory::file($this->privateKey)
         );
 

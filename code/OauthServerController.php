@@ -41,6 +41,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use IanSimpson\OAuth2\AuthorizationValidators\BearerTokenValidatorEddsa;
 
 class OauthServerController extends Controller
 {
@@ -290,7 +291,8 @@ class OauthServerController extends Controller
 
         $server = new ResourceServer(
             new AccessTokenRepository(),
-            $publicKey
+            $publicKey,
+            new BearerTokenValidatorEddsa(new AccessTokenRepository())
         );
 
         $request = ServerRequest::fromGlobals();
@@ -331,7 +333,8 @@ class OauthServerController extends Controller
     {
         $server = new ResourceServer(
             new AccessTokenRepository(),
-            $this->publicKey
+            $this->publicKey,
+            new BearerTokenValidatorEddsa(new AccessTokenRepository())
         );
 
         $this->handleRequest($request);

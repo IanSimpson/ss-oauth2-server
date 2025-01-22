@@ -19,8 +19,12 @@ class Utility
      * @param string $pemKey
      * @return string
      */
-    public static function extractDERKeyValue(string $pemKey)
+    public static function extractDERKeyValue(string $pemKey): string
     {
+        if (empty($pemKey)) {
+            return '';
+        }
+
         $derKey = base64_decode(preg_replace('/-+.*?-+|\s/', '', $pemKey));
 
         return substr($derKey, -32);

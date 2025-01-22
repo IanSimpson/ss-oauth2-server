@@ -22,7 +22,6 @@
         "guzzlehttp/psr7": "^2.5",
         "league/oauth2-server": "^8.2",
         "monolog/monolog": "^1.2",
-        "phpseclib/phpseclib": "^3.0",
         "robbie/psr7-adapters": "^1",
         "silverstripe/framework": "^5",
         "silverstripe/siteconfig": "^5"

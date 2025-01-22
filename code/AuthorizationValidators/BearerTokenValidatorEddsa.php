@@ -35,8 +35,7 @@ class BearerTokenValidatorEddsa extends BearerTokenValidator
     private $jwtConfiguration;
 
     /**
-     * @param AccessTokenRepositoryInterface $accessTokenRepository
-     * @param \DateInterval|null             $jwtValidAtDateLeeway
+     * @inheritDoc
      */
     public function __construct(AccessTokenRepositoryInterface $accessTokenRepository, \DateInterval $jwtValidAtDateLeeway = null)
     {
@@ -44,11 +43,8 @@ class BearerTokenValidatorEddsa extends BearerTokenValidator
         $this->jwtValidAtDateLeeway = $jwtValidAtDateLeeway;
     }
 
-
     /**
-     * Set the public key
-     *
-     * @param CryptKey $key
+     * @inheritDoc
      */
     public function setPublicKey(CryptKey $key)
     {
@@ -58,30 +54,7 @@ class BearerTokenValidatorEddsa extends BearerTokenValidator
     }
 
     /**
-     * Initialise the JWT configuration.
-     */
-    protected function initJwtConfiguration()
-    {
-        $this->jwtConfiguration = Configuration::forSymmetricSigner(
-            new Eddsa(),
-            InMemory::plainText('empty', 'empty')
-        );
-
-        $clock = new SystemClock(new DateTimeZone(\date_default_timezone_get()));
-        $publicKeyResource = $this->publicKey->getKeyContents(); // Ensure this contains the PEM key
-        $sodiumPublicKey = Utility::extractDERKeyValue($publicKeyResource);
-
-        $this->jwtConfiguration->setValidationConstraints(
-            new LooseValidAt($clock, $this->jwtValidAtDateLeeway),
-            new SignedWith(
-                new Eddsa(),
-                InMemory::plainText($sodiumPublicKey, $this->publicKey->getPassPhrase() ?? '')
-            )
-        );
-    }
-
-    /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function validateAuthorization(ServerRequestInterface $request)
     {
@@ -123,11 +96,36 @@ class BearerTokenValidatorEddsa extends BearerTokenValidator
     }
 
     /**
+     * Override this to use a different signer compatible with EdDSA algorithm
+     */
+    protected function initJwtConfiguration()
+    {
+        $this->jwtConfiguration = Configuration::forSymmetricSigner(
+            new Eddsa(),
+            InMemory::plainText('empty', 'empty')
+        );
+
+        $clock = new SystemClock(new DateTimeZone(\date_default_timezone_get()));
+
+        // Extract PEM formatted key from generated public key
+        $publicKeyResource = $this->publicKey->getKeyContents();
+
+        // Extract the public key in DER format
+        $derPublicKey = Utility::extractDERKeyValue($publicKeyResource);
+
+        $this->jwtConfiguration->setValidationConstraints(
+            new LooseValidAt($clock, $this->jwtValidAtDateLeeway),
+            new SignedWith(
+                new Eddsa(),
+                InMemory::plainText($derPublicKey, $this->publicKey->getPassPhrase() ?? '')
+            )
+        );
+    }
+
+    /**
      * Convert single record arrays into strings to ensure backwards compatibility between v4 and v3.x of lcobucci/jwt
      *
-     * @param mixed $aud
-     *
-     * @return array|string
+     * @inheritDoc
      */
     private function convertSingleRecordAudToString($aud)
     {

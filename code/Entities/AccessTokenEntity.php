@@ -96,10 +96,14 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
      */
     public function convertToJWT()
     {
-        // Load the PEM-encoded private key from file (e.g., this can be $this->privateKey->getKeyContents())
-        $pemPrivateKey = $this->privateKey->getKeyContents(); // Ensure this contains the PEM key
-        $sodiumPrivateKey = Utility::extractDERKeyValue($pemPrivateKey);
-        $secretkey = sodium_crypto_sign_secretkey(sodium_crypto_sign_seed_keypair($sodiumPrivateKey));
+        // Extract the PEM key generated
+        $pemPrivateKey = $this->privateKey->getKeyContents();
+
+        // Extract the DER formatted key to use as seed for generating the private/secret key
+        $derKey = Utility::extractDERKeyValue($pemPrivateKey);
+
+        // Generate the secret key via Sodium library
+        $secretkey = sodium_crypto_sign_secretkey(sodium_crypto_sign_seed_keypair($derKey));
 
         // Configure the JWT generation
         $config = Configuration::forAsymmetricSigner(

@@ -24,19 +24,10 @@ Install the add-on with Composer:
 composer require iansimpson/ss-oauth2-server
 ```
 
-Next, generate a private/public key pair:
-
-```sh
-openssl genrsa -out private.key 2048
-openssl rsa -in private.key -pubout -out public.key
-chmod 600 private.key
-chmod 600 public.key
-```
-
-To generate ED25519 private/public key pair:
+Next, generate a private/public key pair using Ed25519 algorithm:
 ```shell
 openssl genpkey -algorithm Ed25519 -out private.key
-openssl pkey -in ed25519-private.key -pubout -out public.key
+openssl pkey -in private.key -pubout -out public.key
 chmod 600 private.key
 chmod 600 public.key
 ```

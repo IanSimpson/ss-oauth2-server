@@ -191,7 +191,7 @@ class OauthServerController extends Controller
         return self::config()->grant_expiry_interval ?? self::$grant_expiry_interval;
     }
 
-    public function handleRequest(HTTPRequest $request)
+    public function handleRequest(HTTPRequest $request): HTTPResponse
     {
         $this->myRequestAdapter = new HttpRequestAdapter();
         $this->myRequest        = $this->myRequestAdapter->toPsr7($request);

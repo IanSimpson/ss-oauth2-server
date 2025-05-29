@@ -34,6 +34,9 @@ class BearerTokenValidatorEddsa extends BearerTokenValidator
      */
     private $jwtConfiguration;
 
+    private $accessTokenRepository;
+    private $jwtValidAtDateLeeway;
+
     /**
      * @inheritDoc
      */

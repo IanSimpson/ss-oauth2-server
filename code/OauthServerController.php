@@ -186,7 +186,7 @@ class OauthServerController extends Controller
         parent::__construct();
     }
 
-    public static function getGrantTypeExpiryInterval(): string
+    public static function getGrantTypeExpiryInterval(): mixed
     {
         return self::config()->grant_expiry_interval ?? self::$grant_expiry_interval;
     }

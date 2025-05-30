@@ -322,7 +322,7 @@ class OauthServerControllerTest extends FunctionalTest
     public function testGetGrantTypeExpiryInterval(): void
     {
         $oauthController = OauthServerController::singleton();
-        OauthServerController::config()->merge('grant_expiry_interval', 'PT1H');
-        $this->assertSame('PT1H', $oauthController::getGrantTypeExpiryInterval());
+        OauthServerController::config()->merge('grant_expiry_interval', ['PT1H']);
+        $this->assertSame('PT1H', $oauthController::getGrantTypeExpiryInterval()[0]);
     }
 }

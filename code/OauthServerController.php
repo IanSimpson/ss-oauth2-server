@@ -12,15 +12,17 @@ use Exception;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Utils;
-use IanSimpson\OAuth2\Entities\UserEntity;
+use IanSimpson\OAuth2\AuthorizationValidators\BearerTokenValidatorEddsa;
 use IanSimpson\OAuth2\Entities\ClientEntity;
 use IanSimpson\OAuth2\Entities\ScopeEntity;
+use IanSimpson\OAuth2\Entities\UserEntity;
 use IanSimpson\OAuth2\Repositories\AccessTokenRepository;
 use IanSimpson\OAuth2\Repositories\AuthCodeRepository;
 use IanSimpson\OAuth2\Repositories\ClientRepository;
 use IanSimpson\OAuth2\Repositories\RefreshTokenRepository;
 use IanSimpson\OAuth2\Repositories\ScopeRepository;
 use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
@@ -41,7 +43,6 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
-use IanSimpson\OAuth2\AuthorizationValidators\BearerTokenValidatorEddsa;
 
 class OauthServerController extends Controller
 {
@@ -71,6 +72,11 @@ class OauthServerController extends Controller
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var null|AuthorizationValidatorInterface
+     */
+    protected $authorizationValidator = null;
 
     private readonly string $privateKey;
 
@@ -191,6 +197,16 @@ class OauthServerController extends Controller
         return self::config()->grant_expiry_interval ?? self::$grant_expiry_interval;
     }
 
+    public function getAuthorizationValidator(): ?AuthorizationValidatorInterface
+    {
+        return $this->authorizationValidator;
+    }
+
+    public function setAuthorizationValidator(?AuthorizationValidatorInterface $value): void
+    {
+        $this->authorizationValidator = $value;
+    }
+
     public function handleRequest(HTTPRequest $request): HTTPResponse
     {
         $this->myRequestAdapter = new HttpRequestAdapter();
@@ -285,14 +301,14 @@ class OauthServerController extends Controller
     /**
      * @param mixed $controller
      */
-    public static function authenticateRequest($controller): ?ServerRequestInterface
+    public function authenticateRequest($controller): ?ServerRequestInterface
     {
         $publicKey = self::getKey('OAUTH_PUBLIC_KEY_PATH');
 
         $server = new ResourceServer(
             new AccessTokenRepository(),
             $publicKey,
-            new BearerTokenValidatorEddsa(new AccessTokenRepository())
+            $this->getAuthorizationValidator()
         );
 
         $request = ServerRequest::fromGlobals();
@@ -313,9 +329,9 @@ class OauthServerController extends Controller
     /**
      * @param mixed $controller
      */
-    public static function getMember($controller): ?Member
+    public function getMember($controller): ?Member
     {
-        $request = self::authenticateRequest($controller);
+        $request = $this->authenticateRequest($controller);
 
         if (!$request instanceof ServerRequestInterface) {
             return null;
@@ -334,7 +350,7 @@ class OauthServerController extends Controller
         $server = new ResourceServer(
             new AccessTokenRepository(),
             $this->publicKey,
-            new BearerTokenValidatorEddsa(new AccessTokenRepository())
+            $this->getAuthorizationValidator()
         );
 
         $this->handleRequest($request);

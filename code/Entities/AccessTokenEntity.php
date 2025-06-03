@@ -11,10 +11,9 @@ use DateInterval;
 use DateTimeImmutable;
 use Exception;
 use IanSimpson\OAuth2\OauthServerController;
-use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Eddsa;
-use Lcobucci\JWT\Signer\Key\InMemory;
+use IanSimpson\OAuth2\Utility\Utility;
 use Lcobucci\JWT\Token;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -24,9 +23,6 @@ use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Member;
-use Lcobucci\JWT\Builder;
-use League\OAuth2\Server\CryptKey;
-use IanSimpson\OAuth2\Utility\Utility;
 
 /**
  * @property ?string $Code
@@ -40,7 +36,9 @@ use IanSimpson\OAuth2\Utility\Utility;
  */
 class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
 {
-    use AccessTokenTrait;
+    use AccessTokenTrait {
+        convertToJWT as defaultConvertToJWT;
+    }
     use TokenEntityTrait;
     use EntityTrait;
 
@@ -90,38 +88,31 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
     ];
 
     /**
+     * TODO: Update to CryptkeyInterface once `league/oauth2-server` is updated to `^9`
+     */
+    public function getPrivateKey(): ?CryptKey
+    {
+        return $this->privateKey;
+    }
+
+    /**
      * Generate a JWT from the access token
      *
      * @return Token
      */
-    public function convertToJWT()
+    public function convertToJWT(): Token
     {
-        // Extract the PEM key generated
-        $pemPrivateKey = $this->privateKey->getKeyContents();
+        $token = null;
 
-        // Extract the DER formatted key to use as seed for generating the private/secret key
-        $derKey = Utility::extractDERKeyValue($pemPrivateKey);
+        // Get token from extension (in case of different implementation than the default)
+        $this->extend('updateJWT', $token);
 
-        // Generate the secret key via Sodium library
-        $secretkey = sodium_crypto_sign_secretkey(sodium_crypto_sign_seed_keypair($derKey));
+        if ($token) {
+            return $token;
+        }
 
-        // Configure the JWT generation
-        $config = Configuration::forAsymmetricSigner(
-            new Eddsa(),
-            InMemory::plainText($secretkey),
-            InMemory::plainText('empty', 'empty')
-        );
-
-        // return the token
-        return $config->builder()
-            ->permittedFor($this->getClient()->getIdentifier())
-            ->identifiedBy($this->getIdentifier())
-            ->issuedAt(new DateTimeImmutable())
-            ->canOnlyBeUsedAfter(new DateTimeImmutable())
-            ->expiresAt($this->getExpiryDateTime())
-            ->relatedTo((string) $this->getUserIdentifier())
-            ->withClaim('scopes', $this->getScopes())
-            ->getToken($config->signer(), $config->signingKey());
+        // Default token generated
+        return $this->defaultConvertToJWT();
     }
 
     public function getIdentifier(): string

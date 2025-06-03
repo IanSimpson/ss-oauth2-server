@@ -12,11 +12,12 @@ use IanSimpson\OAuth2\Entities\ClientEntity;
 use IanSimpson\OAuth2\OauthServerController;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Signer\Eddsa;
+use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Validation\Constraint\IdentifiedBy;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\RelatedTo;
+use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use Monolog\Logger;
@@ -28,6 +29,7 @@ use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\Member;
+use IanSimpson\Tests\Fixtures\BearerTokenValidatorFake;
 
 /**
  * @internal
@@ -212,7 +214,7 @@ class OauthServerControllerTest extends FunctionalTest
         $this->assertNotEmpty($m->ID);
 
         $configuration = Configuration::forSymmetricSigner(
-            new Eddsa(),
+            new Sha256(),
             InMemory::file($this->privateKey)
         );
 
@@ -241,7 +243,7 @@ class OauthServerControllerTest extends FunctionalTest
 
         $_SERVER['AUTHORIZATION'] = sprintf('Bearer %s', $at->__toString());
 
-        $request = OauthServerController::authenticateRequest(null);
+        $request = OauthServerController::singleton()->authenticateRequest(null);
 
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
         $this->assertSame($request->getAttribute('oauth_access_token_id'), $at->Code);
@@ -287,7 +289,7 @@ class OauthServerControllerTest extends FunctionalTest
         $this->assertNotEmpty($c->ClientIdentifier);
 
         $configuration = Configuration::forSymmetricSigner(
-            new Eddsa(),
+            new Sha256(),
             InMemory::file($this->privateKey)
         );
 
@@ -324,5 +326,14 @@ class OauthServerControllerTest extends FunctionalTest
         $oauthController = OauthServerController::singleton();
         OauthServerController::config()->merge('grant_expiry_interval', ['PT1H']);
         $this->assertSame('PT1H', $oauthController::getGrantTypeExpiryInterval()[0]);
+    }
+
+    public function testGetAuthorizationValidator(): void
+    {
+        $oauthController = OauthServerController::singleton();
+        $this->assertNull($oauthController->getAuthorizationValidator());
+
+        $oauthController->setAuthorizationValidator(new BearerTokenValidatorFake());
+        $this->assertInstanceOf(BearerTokenValidatorFake::class, $oauthController->getAuthorizationValidator());
     }
 }

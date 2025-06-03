@@ -11,7 +11,6 @@ use DateInterval;
 use DateTimeImmutable;
 use Exception;
 use IanSimpson\OAuth2\OauthServerController;
-use IanSimpson\OAuth2\Utility\Utility;
 use Lcobucci\JWT\Token;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;

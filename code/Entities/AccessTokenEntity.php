@@ -124,8 +124,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
      */
     public function getExpiryDateTime(): DateTimeImmutable
     {
-        return (new DateTimeImmutable())->setTimestamp((int) $this->Expiry)
-            ->add(new DateInterval(OauthServerController::getGrantTypeExpiryInterval()));
+        return (new DateTimeImmutable())->setTimestamp((int) $this->Expiry);
     }
 
     public function getUserIdentifier(): string

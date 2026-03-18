@@ -2,6 +2,8 @@
 
 namespace IanSimpson\Tests;
 
+use DateInterval;
+use DateTimeImmutable;
 use IanSimpson\OAuth2\Entities\AccessTokenEntity;
 use IanSimpson\Tests\Fixtures\AccessTokenEntityExtensionFake;
 use Lcobucci\JWT\Token\Plain;
@@ -31,5 +33,14 @@ class AccessTokenEntityTest extends SapphireTest
     {
         $entity = AccessTokenEntity::create();
         $this->assertInstanceOf(Plain::class, $entity->convertToJWT());
+    }
+
+    public function testGetExpiryDateTime(): void
+    {
+        $entity = AccessTokenEntity::create();
+        $expectedTime = time() + 3600;
+        $entity->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
+
+        $this->assertEquals($expectedTime, $entity->getExpiryDateTime()->getTimestamp());
     }
 }

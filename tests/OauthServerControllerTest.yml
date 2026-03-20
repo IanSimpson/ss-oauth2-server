@@ -8,13 +8,15 @@ IanSimpson\OAuth2\Entities\ClientEntity:
     ClientIdentifier: 123
     ClientSecret: 456
     ClientRedirectUri: http://client/callback
+    ClientConfidential: 1
+    ClientGrantType: authorization_code
   test2:
     ClientName: test
     ClientIdentifier: 456
     ClientSecret: 789
     ClientRedirectUri: http://client/callback
     ClientConfidential: 1
-    ClientGrantType: authorization_code
+    ClientGrantType: client_credentials
 IanSimpson\OAuth2\Entities\ScopeEntity:
   test:
     ScopeIdentifier: read_profile

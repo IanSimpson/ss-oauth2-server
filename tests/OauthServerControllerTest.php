@@ -4,6 +4,7 @@ namespace IanSimpson\Tests;
 
 use DateInterval;
 use DateTimeImmutable;
+use IanSimpson\OAuth2\Repositories\AccessTokenRepository;
 use JsonException;
 use GuzzleHttp\Psr7\Query;
 use IanSimpson\OAuth2\Entities\AccessTokenEntity;
@@ -18,6 +19,7 @@ use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\RelatedTo;
 use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
+use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use Monolog\Logger;
@@ -186,7 +188,7 @@ class OauthServerControllerTest extends FunctionalTest
 
         $authCode = $this->encrypt(json_encode($payload, JSON_THROW_ON_ERROR));
 
-        $resp = $this->post('http://localhost/oauth/access_token', [
+        $resp = $this->post('http://localhost/oauth/access_token/', [
             'client_id' => $c->ClientIdentifier,
             // Secret cannot be obtained from $c, at this point it's already hashed.
             'client_secret' => '456',
@@ -243,6 +245,7 @@ class OauthServerControllerTest extends FunctionalTest
 
         $_SERVER['AUTHORIZATION'] = sprintf('Bearer %s', $at->__toString());
 
+
         $request = OauthServerController::singleton()->authenticateRequest(null);
 
         $this->assertInstanceOf(ServerRequestInterface::class, $request);
@@ -261,7 +264,7 @@ class OauthServerControllerTest extends FunctionalTest
         $c = $this->objFromFixture(ClientEntity::class, 'test2');
 
         $resp = $this->post(
-            'http://localhost/oauth/access_token',
+            'http://localhost/oauth/access_token/',
             [
                 'grant_type'    => 'client_credentials'
             ],
@@ -313,7 +316,7 @@ class OauthServerControllerTest extends FunctionalTest
 
         // Now that we have a token, test if we can authenticate
         $resp = $this->post(
-            'http://localhost/oauth/validate',
+            'http://localhost/oauth/validate/',
             [],
             ['Authorization' => $token->toString()]
         );

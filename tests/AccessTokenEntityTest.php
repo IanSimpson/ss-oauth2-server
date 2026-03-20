@@ -6,9 +6,12 @@ use DateInterval;
 use DateTimeImmutable;
 use IanSimpson\OAuth2\Entities\AccessTokenEntity;
 use IanSimpson\Tests\Fixtures\AccessTokenEntityExtensionFake;
+use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Token\Plain;
 use League\OAuth2\Server\CryptKey;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Dev\TestOnly;
 
 class AccessTokenEntityTest extends SapphireTest
 {

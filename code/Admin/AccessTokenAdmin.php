@@ -6,16 +6,16 @@ use IanSimpson\OAuth2\Entities\AccessTokenEntity;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * @method SiteConfig&static getOwner()
  */
-class AccessTokenAdmin extends DataExtension
+class AccessTokenAdmin extends Extension
 {
-    public function updateCMSFields(FieldList $fields): void
+    protected function updateCMSFields(FieldList $fields): void
     {
         $gridFieldConfig = GridFieldConfig_RecordEditor::create(20);
 

@@ -10,11 +10,7 @@ use SilverStripe\Core\Injector\Factory;
 
 class LogFactory implements Factory
 {
-    /**
-     * @param string $service
-     * @param string[] $params
-     */
-    public function create($service, array $params = []): Logger
+    public function create(string $service, array $params = []): Logger
     {
         $logger = new Logger('ss-oauth2');
         $syslog = new SyslogHandler('SilverStripe_oauth2', LOG_AUTH, Logger::DEBUG);

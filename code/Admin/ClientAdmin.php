@@ -11,8 +11,8 @@ use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\SiteConfig\SiteConfig;
 
@@ -20,7 +20,7 @@ use SilverStripe\SiteConfig\SiteConfig;
  * @method ClientEntity[]|HasManyList Clients()
  * @method SiteConfig&static getOwner()
  */
-class ClientAdmin extends DataExtension
+class ClientAdmin extends Extension
 {
     /**
      * @var array|string[]
@@ -31,7 +31,7 @@ class ClientAdmin extends DataExtension
         'Clients' => ClientEntity::class,
     ];
 
-    public function updateCMSFields(FieldList $fields): void
+    protected function updateCMSFields(FieldList $fields): void
     {
         $gridFieldConfig = GridFieldConfig::create();
         $button = GridFieldAddNewButton::create('toolbar-header-right');

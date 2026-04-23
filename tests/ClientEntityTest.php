@@ -5,7 +5,7 @@ namespace IanSimpson\Tests;
 use IanSimpson\OAuth2\Entities\ClientEntity;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\ORM\ValidationException;
+use SilverStripe\Core\Validation\ValidationException;
 
 /**
  * @internal

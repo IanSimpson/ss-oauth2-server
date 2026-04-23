@@ -27,11 +27,6 @@ parameters:
         - '#Dynamic call to static method SilverStripe\\Dev\\FunctionalTest#'
         - '#Dynamic call to static method SilverStripe\\Dev\\SapphireTest#'
         -
-            message: "#^Parameter \\#2 \\$params \\(array\\<string\\>\\) of method IanSimpson\\\\OAuth2\\\\LogFactory\\:\\:create\\(\\) should be contravariant with parameter \\$params \\(array\\) of method SilverStripe\\\\Core\\\\Injector\\\\Factory\\:\\:create\\(\\)$#"
-            count: 1
-            path: code/LogFactory.php
-
-        -
             message: "#^PHPDoc type array\\<string\\>\\|string of property IanSimpson\\\\Tests\\\\OauthServerControllerTest\\:\\:\\$fixture_file is not the same as PHPDoc type array\\|string of overridden property SilverStripe\\\\Dev\\\\SapphireTest\\:\\:\\$fixture_file\\.$#"
             count: 1
             path: tests/OauthServerControllerTest.php

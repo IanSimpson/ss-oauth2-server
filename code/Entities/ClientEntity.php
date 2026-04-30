@@ -179,7 +179,7 @@ class ClientEntity extends DataObject implements ClientEntityInterface
      *
      * @return ValidationResult
      */
-    public function validate()
+    public function validate(): ValidationResult
     {
         $result = ValidationResult::create();
 

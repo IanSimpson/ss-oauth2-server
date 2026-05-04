@@ -21,6 +21,7 @@ use Lcobucci\JWT\Validation\Constraint\RelatedTo;
 use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
 use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\CryptTrait;
 use Monolog\Logger;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -338,5 +339,98 @@ class OauthServerControllerTest extends FunctionalTest
 
         $oauthController->setAuthorizationValidator(new BearerTokenValidatorFake());
         $this->assertInstanceOf(BearerTokenValidatorFake::class, $oauthController->getAuthorizationValidator());
+    }
+
+
+    /**
+     * @covers \IanSimpson\OAuth2\OauthServerController::createPrivateKey
+     * @covers \IanSimpson\OAuth2\OauthServerController::createPublicKey
+     */
+    public function testCreateKeyFallsBackToCryptKeyWhenNoInjectorBinding(): void
+    {
+        // Remove any existing binding so the fallback path is exercised
+        Injector::inst()->unregisterNamedObject(CryptKeyInterface::class);
+
+        $controller = new class extends OauthServerController {
+            public function exposeCreatePrivateKey(string $path): CryptKeyInterface
+            {
+                return $this->createPrivateKey($path);
+            }
+
+            public function exposeCreatePublicKey(string $path): CryptKeyInterface
+            {
+                return $this->createPublicKey($path);
+            }
+        };
+
+        $privateKey = $controller->exposeCreatePrivateKey($this->privateKey);
+        $publicKey = $controller->exposeCreatePublicKey($this->publicKey);
+
+        $this->assertInstanceOf(CryptKey::class, $privateKey);
+        $this->assertInstanceOf(CryptKey::class, $publicKey);
+    }
+
+    /**
+     * @covers \IanSimpson\OAuth2\OauthServerController::createPrivateKey
+     * @covers \IanSimpson\OAuth2\OauthServerController::createPublicKey
+     */
+    public function testCreateKeyUsesInjectorBindingWhenConfigured(): void
+    {
+        $privatePath = $this->privateKey;
+        $publicPath = $this->publicKey;
+
+        // Create an anonymous custom CryptKey implementation
+        $customKey = new class ($privatePath) implements CryptKeyInterface {
+            private string $path;
+
+            public function __construct(string $path)
+            {
+                $this->path = $path;
+            }
+
+            public function getKeyPath(): string
+            {
+                return $this->path;
+            }
+
+            public function getPassPhrase(): ?string
+            {
+                return null;
+            }
+
+            public function getKeyContents(): string
+            {
+                return (string) file_get_contents($this->path);
+            }
+        };
+
+        $customClass = $customKey::class;
+
+        // Register the custom class via Injector
+        Injector::inst()->registerService(
+            Injector::inst()->create($customClass, $privatePath),
+            CryptKeyInterface::class
+        );
+
+        $controller = new class extends OauthServerController {
+            public function exposeCreatePrivateKey(string $path): CryptKeyInterface
+            {
+                return $this->createPrivateKey($path);
+            }
+
+            public function exposeCreatePublicKey(string $path): CryptKeyInterface
+            {
+                return $this->createPublicKey($path);
+            }
+        };
+
+        $privateKey = $controller->exposeCreatePrivateKey($privatePath);
+        $publicKey = $controller->exposeCreatePublicKey($publicPath);
+
+        $this->assertInstanceOf($customClass, $privateKey);
+        $this->assertInstanceOf($customClass, $publicKey);
+
+        // Clean up
+        Injector::inst()->unregisterNamedObject(CryptKeyInterface::class);
     }
 }

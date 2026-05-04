@@ -14,7 +14,7 @@ class BearerTokenValidatorFake implements AuthorizationValidatorInterface, TestO
     /**
      * @inheritDoc
      */
-    public function validateAuthorization(ServerRequestInterface $request)
+    public function validateAuthorization(ServerRequestInterface $request): ServerRequestInterface
     {
         return null;
     }

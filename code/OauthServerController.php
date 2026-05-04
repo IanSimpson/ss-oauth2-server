@@ -23,6 +23,8 @@ use IanSimpson\OAuth2\Repositories\RefreshTokenRepository;
 use IanSimpson\OAuth2\Repositories\ScopeRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
+use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
@@ -78,9 +80,9 @@ class OauthServerController extends Controller
      */
     protected $authorizationValidator = null;
 
-    private readonly string $privateKey;
+    private readonly CryptKeyInterface $privateKey;
 
-    private readonly string $publicKey;
+    private readonly CryptKeyInterface $publicKey;
 
     private readonly string $encryptionKey;
 
@@ -133,8 +135,8 @@ class OauthServerController extends Controller
             throw new Exception('OauthServerController::$encryptionKey must not be empty!');
         }
 
-        $this->privateKey = self::getKey('OAUTH_PRIVATE_KEY_PATH');
-        $this->publicKey  = self::getKey('OAUTH_PUBLIC_KEY_PATH');
+        $this->privateKey = $this->createPrivateKey(self::getKey('OAUTH_PRIVATE_KEY_PATH'));
+        $this->publicKey  = $this->createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
         $this->encryptionKey = self::getKey('OAUTH_ENCRYPTION_KEY');
 
         $this->myRepositories = [
@@ -303,11 +305,9 @@ class OauthServerController extends Controller
      */
     public function authenticateRequest($controller): ?ServerRequestInterface
     {
-        $publicKey = self::getKey('OAUTH_PUBLIC_KEY_PATH');
-
         $server = new ResourceServer(
             new AccessTokenRepository(),
-            $publicKey,
+            $this->publicKey,
             $this->getAuthorizationValidator()
         );
 
@@ -362,6 +362,24 @@ class OauthServerController extends Controller
         }
 
         return new HTTPResponse('', 200);
+    }
+
+    protected function createPrivateKey(string $path): CryptKeyInterface
+    {
+        try {
+            return Injector::inst()->create(CryptKeyInterface::class, $path);
+        } catch (\Exception $e) {
+            return new CryptKey($path);
+        }
+    }
+
+    protected function createPublicKey(string $path): CryptKeyInterface
+    {
+        try {
+            return Injector::inst()->create(CryptKeyInterface::class, $path);
+        } catch (\Exception $e) {
+            return new CryptKey($path);
+        }
     }
 
     private static function getKey(string $key): string

@@ -23,7 +23,7 @@ use SilverStripe\Security\Member;
  * @property int $Expiry
  * @property bool $Revoked
  * @property int $ClientID
- * @property int $MemberID
+ * @property ?string $MemberID
  *
  * @method ClientEntity               Client()
  * @method Member                     Member()
@@ -80,7 +80,7 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
         return (new DateTimeImmutable())->setTimestamp((int) $this->Expiry);
     }
 
-    public function getUserIdentifier(): int
+    public function getUserIdentifier(): ?string
     {
         return $this->MemberID;
     }
@@ -98,34 +98,24 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
         return $this->Client();
     }
 
-    public function setIdentifier(mixed $code): self
+    public function setIdentifier(mixed $code): void
     {
         $this->Code = (string) $code;
-
-        return $this;
     }
 
-    public function setExpiryDateTime(DateTimeImmutable $expiry): self
+    public function setExpiryDateTime(DateTimeImmutable $expiry): void
     {
         $this->Expiry = $expiry->getTimestamp();
-
-        return $this;
     }
 
-    public function setUserIdentifier(mixed $id): self
+    public function setUserIdentifier(mixed $id): void
     {
         $this->MemberID = (int) $id;
-
-        return $this;
     }
 
-    public function addScope(ScopeEntityInterface $scope): self
+    public function addScope(ScopeEntityInterface $scope): void
     {
-        if ($scope instanceof ScopeEntity) {
-            $this->ScopeEntities()->add($scope);
-        }
-
-        return $this;
+        $this->ScopeEntities()->add($scope);
     }
 
     /**
@@ -142,12 +132,8 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
         return $this;
     }
 
-    public function setClient(ClientEntityInterface $client): self
+    public function setClient(ClientEntityInterface $client): void
     {
-        if ($client instanceof ClientEntity) {
-            $this->ClientID = $client->ID;
-        }
-
-        return $this;
+        $this->ClientID = $client->ID;
     }
 }

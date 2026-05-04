@@ -69,26 +69,18 @@ class RefreshTokenEntity extends DataObject implements RefreshTokenEntityInterfa
         return $this->AccessToken();
     }
 
-    public function setIdentifier($code): self
+    public function setIdentifier(string $code): void
     {
         $this->Code = $code;
-
-        return $this;
     }
 
-    public function setExpiryDateTime(DateTimeImmutable $expiry): self
+    public function setExpiryDateTime(DateTimeImmutable $expiry): void
     {
         $this->Expiry = $expiry->getTimestamp();
-
-        return $this;
     }
 
-    public function setAccessToken(AccessTokenEntityInterface $accessToken): self
+    public function setAccessToken(AccessTokenEntityInterface $accessToken): void
     {
-        if ($accessToken instanceof AccessTokenEntity) {
-            $this->AccessTokenID = $accessToken->ID;
-        }
-
-        return $this;
+        $this->AccessTokenID = $accessToken->ID;
     }
 }

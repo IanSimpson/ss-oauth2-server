@@ -15,8 +15,8 @@ class UserEntity implements UserEntityInterface
     /**
      * Return the user's identifier.
      */
-    public function getIdentifier(): ?int
+    public function getIdentifier(): string
     {
-        return Security::getCurrentUser()?->ID;
+        return (string)Security::getCurrentUser()?->ID;
     }
 }

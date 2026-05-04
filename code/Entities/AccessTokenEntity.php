@@ -7,12 +7,10 @@
 
 namespace IanSimpson\OAuth2\Entities;
 
-use DateInterval;
 use DateTimeImmutable;
 use Exception;
-use IanSimpson\OAuth2\OauthServerController;
 use Lcobucci\JWT\Token;
-use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -86,10 +84,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         'Code',
     ];
 
-    /**
-     * TODO: Update to CryptkeyInterface once `league/oauth2-server` is updated to `^9`
-     */
-    public function getPrivateKey(): ?CryptKey
+    public function getPrivateKey(): CryptKeyInterface
     {
         return $this->privateKey;
     }
@@ -145,34 +140,24 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         return $this->Client();
     }
 
-    public function setIdentifier(mixed $code): self
+    public function setIdentifier(mixed $code): void
     {
         $this->Code = (string) $code;
-
-        return $this;
     }
 
-    public function setExpiryDateTime(DateTimeImmutable $expiry): self
+    public function setExpiryDateTime(DateTimeImmutable $expiry): void
     {
         $this->Expiry = $expiry->getTimestamp();
-
-        return $this;
     }
 
-    public function setUserIdentifier(mixed $id): self
+    public function setUserIdentifier(mixed $id): void
     {
         $this->MemberID = (int) $id;
-
-        return $this;
     }
 
-    public function addScope(ScopeEntityInterface $scope): self
+    public function addScope(ScopeEntityInterface $scope): void
     {
-        if ($scope instanceof ScopeEntity) {
-            $this->ScopeEntities()->add($scope);
-        }
-
-        return $this;
+        $this->ScopeEntities()->add($scope);
     }
 
     /**
@@ -189,12 +174,8 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         return $this;
     }
 
-    public function setClient(ClientEntityInterface $client): self
+    public function setClient(ClientEntityInterface $client): void
     {
-        if ($client instanceof ClientEntity) {
-            $this->ClientID = $client->ID;
-        }
-
-        return $this;
+        $this->ClientID = $client->ID;
     }
 }

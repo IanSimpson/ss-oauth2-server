@@ -84,7 +84,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         'Code',
     ];
 
-    public function getPrivateKey(): CryptKeyInterface
+    public function getPrivateKey(): ?CryptKeyInterface
     {
         return $this->privateKey;
     }

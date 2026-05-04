@@ -13,3 +13,5 @@ SilverStripe\SiteConfig\SiteConfig:
 SilverStripe\Core\Injector\Injector:
   IanSimpson\OAuth2\Logger:
     factory: 'IanSimpson\OAuth2\LogFactory'
+  League\OAuth2\Server\CryptKeyInterface:
+    class: League\OAuth2\Server\CryptKey

@@ -364,22 +364,22 @@ class OauthServerController extends Controller
         return new HTTPResponse('', 200);
     }
 
+    /**
+     * Return default CryptKey instance for the private key. This can be set on yaml config to allow for custom
+     * CryptKey implementations.
+     */
     protected function createPrivateKey(string $path): CryptKeyInterface
     {
-        try {
-            return Injector::inst()->create(CryptKeyInterface::class, $path);
-        } catch (\Exception $e) {
-            return new CryptKey($path);
-        }
+        return Injector::inst()->create(CryptKeyInterface::class, $path);
     }
 
+    /**
+     * Return default CryptKey instance for the public key. This can be set on yaml config to allow for custom
+     * CryptKey implementations.
+     */
     protected function createPublicKey(string $path): CryptKeyInterface
     {
-        try {
-            return Injector::inst()->create(CryptKeyInterface::class, $path);
-        } catch (\Exception $e) {
-            return new CryptKey($path);
-        }
+        return Injector::inst()->create(CryptKeyInterface::class, $path);
     }
 
     private static function getKey(string $key): string

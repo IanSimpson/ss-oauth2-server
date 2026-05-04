@@ -153,7 +153,7 @@ class OauthServerControllerTest extends FunctionalTest
         $payload = json_decode((string) $this->decrypt($query['code']), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertSame($payload['client_id'], $c->ClientIdentifier);
-        $this->assertSame($payload['user_id'], $m->ID);
+        $this->assertSame($payload['user_id'], (string)$m->ID);
         $this->assertNotEmpty($payload['auth_code_id']);
 
         /** @var AuthCodeEntity|null $authCodeEntity */
@@ -244,7 +244,7 @@ class OauthServerControllerTest extends FunctionalTest
         $at->setPrivateKey(new CryptKey($this->privateKey));
         $at->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT10M')));
 
-        $_SERVER['AUTHORIZATION'] = sprintf('Bearer %s', $at->__toString());
+        $_SERVER['AUTHORIZATION'] = sprintf('Bearer %s', $at->toString());
 
 
         $request = OauthServerController::singleton()->authenticateRequest(null);
@@ -348,9 +348,6 @@ class OauthServerControllerTest extends FunctionalTest
      */
     public function testCreateKeyFallsBackToCryptKeyWhenNoInjectorBinding(): void
     {
-        // Remove any existing binding so the fallback path is exercised
-        Injector::inst()->unregisterNamedObject(CryptKeyInterface::class);
-
         $controller = new class extends OauthServerController {
             public function exposeCreatePrivateKey(string $path): CryptKeyInterface
             {

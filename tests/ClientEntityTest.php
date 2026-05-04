@@ -83,7 +83,7 @@ class ClientEntityTest extends SapphireTest
         $refreshed   = ClientEntity::get()->byID($e->ID);
         $secretField = $refreshed->getCMSFields()->fieldByName('Root.Main.HashedClientSecret');
         $this->assertNull($secretField);
-        $hiddenSecret = $refreshed->getCMSFields()->fieldByName('Root.Main.HiddenHashedClientSecret')?->Value();
+        $hiddenSecret = $refreshed->getCMSFields()->fieldByName('Root.Main.HiddenHashedClientSecret')?->getValue();
         $this->assertSame($hiddenSecret, '<hidden>');
     }
 

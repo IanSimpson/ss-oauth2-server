@@ -33,9 +33,7 @@ use SilverStripe\Security\Member;
  */
 class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
 {
-    use AccessTokenTrait {
-        convertToJWT as defaultConvertToJWT;
-    }
+    use AccessTokenTrait;
     use TokenEntityTrait;
     use EntityTrait;
 
@@ -87,26 +85,6 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
     public function getPrivateKey(): ?CryptKeyInterface
     {
         return $this->privateKey;
-    }
-
-    /**
-     * Generate a JWT from the access token
-     *
-     * @return Token
-     */
-    public function convertToJWT(): Token
-    {
-        $token = null;
-
-        // Get token from extension (in case of different implementation than the default)
-        $this->extend('updateJWT', $token);
-
-        if ($token) {
-            return $token;
-        }
-
-        // Default token generated
-        return $this->defaultConvertToJWT();
     }
 
     public function getIdentifier(): string
@@ -177,5 +155,22 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
     public function setClient(ClientEntityInterface $client): void
     {
         $this->ClientID = $client->ID;
+    }
+
+    /**
+     * Generate a string representation from the access token
+     */
+    public function toString(): string
+    {
+        $token = null;
+
+        // Get token from extension (in case of different implementation than the default)
+        $this->extend('updateJWT', $token);
+
+        if ($token) {
+            return $token->toString();
+        }
+
+        return $this->convertToJWT()->toString();
     }
 }

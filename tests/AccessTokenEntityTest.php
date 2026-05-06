@@ -32,12 +32,6 @@ class AccessTokenEntityTest extends SapphireTest
         $this->assertEquals($cryptKeyFake, $entity->getPrivateKey());
     }
 
-    public function testConvertToJWT(): void
-    {
-        $entity = AccessTokenEntity::create();
-        $this->assertInstanceOf(Plain::class, $entity->convertToJWT());
-    }
-
     public function testGetExpiryDateTime(): void
     {
         $entity = AccessTokenEntity::create();

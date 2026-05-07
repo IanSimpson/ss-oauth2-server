@@ -42,4 +42,9 @@ SilverStripe\Core\Injector\Injector:
 
 ### Update JWT Token
 
-A public method is added to allow updating the generated access token in case the chosen algorithm does not match the token generator. To do so, add an extension to the `AccessTokenEntity` in your project and use the `updateJWT` hook. You may also refer to the [default token generator](https://github.com/thephpleague/oauth2-server/blob/master/src/Entities/Traits/AccessTokenTrait.php#L60), on the token format.
+A public method is added to allow updating the generated access token in case the chosen algorithm does not match the token generator. To do so, add an extension to the `AccessTokenEntity` in your project and use the `updateJWT` hook. See [example](extension.md).
+
+You may also refer to the [default token generator](https://github.com/thephpleague/oauth2-server/blob/master/src/Entities/Traits/AccessTokenTrait.php#L60), on the token format.
+
+### BearerTokenValidatorEddsa
+Custom EdDSA validator that extends the default `BearerTokenValidator` class. See more deatils on [bearer-token-validator-eddsa](bearer-token-validator-eddsa.md).

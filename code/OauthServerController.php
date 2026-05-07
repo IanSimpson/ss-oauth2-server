@@ -12,7 +12,6 @@ use Exception;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Utils;
-use IanSimpson\OAuth2\AuthorizationValidators\BearerTokenValidatorEddsa;
 use IanSimpson\OAuth2\Entities\ClientEntity;
 use IanSimpson\OAuth2\Entities\ScopeEntity;
 use IanSimpson\OAuth2\Entities\UserEntity;

@@ -15,3 +15,7 @@ SilverStripe\Core\Injector\Injector:
     factory: 'IanSimpson\OAuth2\LogFactory'
   League\OAuth2\Server\CryptKeyInterface:
     class: League\OAuth2\Server\CryptKey
+  League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface:
+    class: League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator
+    constructor:
+      AccessTokenRepository: '%$IanSimpson\OAuth2\Repositories\AccessTokenRepository'

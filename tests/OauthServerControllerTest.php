@@ -334,11 +334,21 @@ class OauthServerControllerTest extends FunctionalTest
 
     public function testGetAuthorizationValidator(): void
     {
-        $oauthController = OauthServerController::singleton();
-        $this->assertNull($oauthController->getAuthorizationValidator());
+        // Default validator.
+        $this->assertInstanceOf(
+            BearerTokenValidator::class,
+            OauthServerController::getAuthorizationValidator()
+        );
 
-        $oauthController->setAuthorizationValidator(new BearerTokenValidatorFake());
-        $this->assertInstanceOf(BearerTokenValidatorFake::class, $oauthController->getAuthorizationValidator());
+        OauthServerController::setAuthorizationValidator(null);
+        $this->assertInstanceOf(
+            BearerTokenValidator::class,
+            OauthServerController::getAuthorizationValidator()
+        );
+
+        // Set to custom validator.
+        OauthServerController::setAuthorizationValidator(new BearerTokenValidatorFake());
+        $this->assertInstanceOf(BearerTokenValidatorFake::class, OauthServerController::getAuthorizationValidator());
     }
 
 

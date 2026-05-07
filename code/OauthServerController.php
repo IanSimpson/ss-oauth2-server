@@ -23,6 +23,7 @@ use IanSimpson\OAuth2\Repositories\RefreshTokenRepository;
 use IanSimpson\OAuth2\Repositories\ScopeRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\AuthorizationValidators\AuthorizationValidatorInterface;
+use League\OAuth2\Server\AuthorizationValidators\BearerTokenValidator;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -53,7 +54,12 @@ class OauthServerController extends Controller
      *
      * @config
      */
-    public static string $grant_expiry_interval = 'PT1H';
+    private static string $grant_expiry_interval = 'PT1H';
+
+    /**
+     * Default validator used {@link BearerTokenValidator}.
+     */
+    private static ?AuthorizationValidatorInterface $authorizationValidator = null;
 
     /**
      * @var AuthorizationServer
@@ -74,11 +80,6 @@ class OauthServerController extends Controller
      * @var LoggerInterface
      */
     protected $logger;
-
-    /**
-     * @var null|AuthorizationValidatorInterface
-     */
-    protected $authorizationValidator = null;
 
     private readonly CryptKeyInterface $privateKey;
 
@@ -135,8 +136,8 @@ class OauthServerController extends Controller
             throw new Exception('OauthServerController::$encryptionKey must not be empty!');
         }
 
-        $this->privateKey = $this->createPrivateKey(self::getKey('OAUTH_PRIVATE_KEY_PATH'));
-        $this->publicKey  = $this->createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
+        $this->privateKey = self::createPrivateKey(self::getKey('OAUTH_PRIVATE_KEY_PATH'));
+        $this->publicKey  = self::createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
         $this->encryptionKey = self::getKey('OAUTH_ENCRYPTION_KEY');
 
         $this->myRepositories = [
@@ -196,17 +197,17 @@ class OauthServerController extends Controller
 
     public static function getGrantTypeExpiryInterval(): mixed
     {
-        return self::config()->grant_expiry_interval ?? self::$grant_expiry_interval;
+        return self::config()->get('grant_expiry_interval') ?? self::$grant_expiry_interval;
     }
 
-    public function getAuthorizationValidator(): ?AuthorizationValidatorInterface
+    public static function getAuthorizationValidator(): AuthorizationValidatorInterface
     {
-        return $this->authorizationValidator;
+        return self::$authorizationValidator ?? Injector::inst()->get(AuthorizationValidatorInterface::class);
     }
 
-    public function setAuthorizationValidator(?AuthorizationValidatorInterface $value): void
+    public static function setAuthorizationValidator(?AuthorizationValidatorInterface $value): void
     {
-        $this->authorizationValidator = $value;
+        self::$authorizationValidator = $value;
     }
 
     public function handleRequest(HTTPRequest $request): HTTPResponse
@@ -303,12 +304,14 @@ class OauthServerController extends Controller
     /**
      * @param mixed $controller
      */
-    public function authenticateRequest($controller): ?ServerRequestInterface
+    public static function authenticateRequest($controller): ?ServerRequestInterface
     {
+        $publicKey = self::createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
+
         $server = new ResourceServer(
             new AccessTokenRepository(),
-            $this->publicKey,
-            $this->getAuthorizationValidator()
+            $publicKey,
+            self::getAuthorizationValidator()
         );
 
         $request = ServerRequest::fromGlobals();
@@ -329,9 +332,9 @@ class OauthServerController extends Controller
     /**
      * @param mixed $controller
      */
-    public function getMember($controller): ?Member
+    public static function getMember($controller): ?Member
     {
-        $request = $this->authenticateRequest($controller);
+        $request = self::authenticateRequest($controller);
 
         if (!$request instanceof ServerRequestInterface) {
             return null;
@@ -368,7 +371,7 @@ class OauthServerController extends Controller
      * Return default CryptKey instance for the private key. This can be set on yaml config to allow for custom
      * CryptKey implementations.
      */
-    protected function createPrivateKey(string $path): CryptKeyInterface
+    protected static function createPrivateKey(string $path): CryptKeyInterface
     {
         return Injector::inst()->create(CryptKeyInterface::class, $path);
     }
@@ -377,7 +380,7 @@ class OauthServerController extends Controller
      * Return default CryptKey instance for the public key. This can be set on yaml config to allow for custom
      * CryptKey implementations.
      */
-    protected function createPublicKey(string $path): CryptKeyInterface
+    protected static function createPublicKey(string $path): CryptKeyInterface
     {
         return Injector::inst()->create(CryptKeyInterface::class, $path);
     }

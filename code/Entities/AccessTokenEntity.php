@@ -167,7 +167,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         // Get token from extension (in case of different implementation than the default)
         $this->extend('updateJWT', $token);
 
-        if ($token) {
+        if ($token instanceof Token) {
             return $token->toString();
         }
 

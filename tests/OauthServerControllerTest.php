@@ -30,6 +30,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\Member;
 use IanSimpson\Tests\Fixtures\BearerTokenValidatorFake;
@@ -355,10 +356,6 @@ class OauthServerControllerTest extends FunctionalTest
     }
 
 
-    /**
-     * @covers \IanSimpson\OAuth2\OauthServerController::createPrivateKey
-     * @covers \IanSimpson\OAuth2\OauthServerController::createPublicKey
-     */
     public function testCreateKeyFallsBackToCryptKeyWhenNoInjectorBinding(): void
     {
         $controller = new class extends OauthServerController {
@@ -380,10 +377,6 @@ class OauthServerControllerTest extends FunctionalTest
         $this->assertInstanceOf(CryptKey::class, $publicKey);
     }
 
-    /**
-     * @covers \IanSimpson\OAuth2\OauthServerController::createPrivateKey
-     * @covers \IanSimpson\OAuth2\OauthServerController::createPublicKey
-     */
     public function testCreateKeyUsesInjectorBindingWhenConfigured(): void
     {
         $privatePath = $this->privateKey;

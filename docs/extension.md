@@ -4,6 +4,17 @@ Add an extension to the `AccessTokenEntity` in your project and use the `updateJ
 
 Example
 ```php
+
+use DateTimeImmutable;
+use IanSimpson\OAuth2\Entities\AccessTokenEntity;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Eddsa;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Token;
+use League\OAuth2\Server\CryptKeyInterface;
+use SilverStripe\Core\Extension;
+use Throwable;
+
 public static function extractDERKeyValue(string $pemKey): string
 {
     if (empty($pemKey)) {
@@ -15,25 +26,27 @@ public static function extractDERKeyValue(string $pemKey): string
     return substr($derKey, -32);
 }
 
-public function updateJWT(?Token &$token): void
+public function updateJWT(?Token &$token, ?CryptKeyInterface $privateKey): void
 {
     /** @var AccessTokenEntity $owner */
     $owner = $this->getOwner();
 
     // Extract the PEM key generated
-    $pemPrivateKey = $owner->getPrivateKey()->getKeyContents();
+    $pemPrivateKey = $privateKey?->getKeyContents() ?? '';
 
     // Extract the DER formatted key to use as seed for generating the private/secret key
     $derKey = self::extractDERKeyValue($pemPrivateKey);
 
-    // Generate the secret key via Sodium library
-    $secretkey = sodium_crypto_sign_secretkey(sodium_crypto_sign_seed_keypair($derKey));
+    // Generate the key pairs via Sodium library
+    $keypair = sodium_crypto_sign_seed_keypair($derKey);
+    $secretkey = sodium_crypto_sign_secretkey($keypair);
+    $pubKey = sodium_crypto_sign_publickey($keypair);
 
     // Configure the JWT generation
     $config = Configuration::forAsymmetricSigner(
         new Eddsa(),
         InMemory::plainText($secretkey),
-        InMemory::plainText('empty', 'empty')
+        InMemory::plainText($pubKey)
     );
 
     // return the token
@@ -43,7 +56,7 @@ public function updateJWT(?Token &$token): void
         ->issuedAt(new DateTimeImmutable())
         ->canOnlyBeUsedAfter(new DateTimeImmutable())
         ->expiresAt($owner->getExpiryDateTime())
-        ->relatedTo((string) $owner->getUserIdentifier())
+        ->relatedTo($owner->getUserIdentifier())
         ->withClaim('scopes', $owner->getScopes())
         ->getToken($config->signer(), $config->signingKey());
 }

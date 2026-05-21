@@ -10,7 +10,6 @@ namespace IanSimpson\OAuth2\Entities;
 use DateTimeImmutable;
 use Exception;
 use Lcobucci\JWT\Token;
-use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -82,10 +81,6 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         'Code',
     ];
 
-    public function getPrivateKey(): ?CryptKeyInterface
-    {
-        return $this->privateKey;
-    }
 
     public function getIdentifier(): string
     {
@@ -165,7 +160,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
         $token = null;
 
         // Get token from extension (in case of different implementation than the default)
-        $this->extend('updateJWT', $token);
+        $this->extend('updateJWT', $token, $this->privateKey);
 
         if ($token instanceof Token) {
             return $token->toString();

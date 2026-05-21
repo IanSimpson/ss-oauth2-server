@@ -21,17 +21,6 @@ class AccessTokenEntityTest extends SapphireTest
         ]
     ];
 
-    public function testGetPrivateKey(): void
-    {
-        $cryptKeyFake = $this->createMock(CryptKey::class);
-        $entity = AccessTokenEntity::create();
-
-        $this->assertNull($entity->getPrivateKey());
-
-        $entity->setPrivateKey($cryptKeyFake);
-        $this->assertEquals($cryptKeyFake, $entity->getPrivateKey());
-    }
-
     public function testGetExpiryDateTime(): void
     {
         $entity = AccessTokenEntity::create();

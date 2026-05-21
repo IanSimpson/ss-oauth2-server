@@ -11,6 +11,16 @@ It supports the following grants:
  * Authorization code grant
  * Refresh grant
 
+## ⚠️ Upgrade Warning
+
+### Grant Type Validation
+
+Grant type validation has been updated to strictly match the grant type stored in the Silverstripe CMS against the grant type sent in the request. Previously, these could differ without causing an error.
+
+**Action required:** If you are upgrading from previous module version or upgrading to CMS version 6, you must ensure that the **Grant Type value stored against each OAuth client in the CMS** matches the grant type used in your access token requests (e.g. `authorization_code`, `client_credentials`). Mismatched values will now cause the token request to be rejected.
+
+---
+
 ## Requirements 🦺
 
  * PHP ^8.1

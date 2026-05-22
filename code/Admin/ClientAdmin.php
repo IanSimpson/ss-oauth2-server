@@ -14,11 +14,9 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\SiteConfig\SiteConfig;
 
 /**
- * @method ClientEntity[]|HasManyList Clients()
- * @method SiteConfig&static getOwner()
+ * @method HasManyList<ClientEntity> Clients()
  */
 class ClientAdmin extends Extension
 {

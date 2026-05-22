@@ -28,7 +28,7 @@ use SilverStripe\Security\Member;
  * @property int $MemberID
  * @method ClientEntity Client()
  * @method Member Member()
- * @method ManyManyList|ScopeEntity[] ScopeEntities()
+ * @method ManyManyList<ScopeEntity> ScopeEntities()
  */
 class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
 {
@@ -136,7 +136,7 @@ class AccessTokenEntity extends DataObject implements AccessTokenEntityInterface
     /**
      * @param ScopeEntity[] $scopes
      */
-    public function setScopes($scopes): self
+    public function setScopes($scopes): AccessTokenEntity
     {
         $this->ScopeEntities()->removeAll();
 

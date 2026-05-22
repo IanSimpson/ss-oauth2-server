@@ -27,7 +27,7 @@ use SilverStripe\Security\Member;
  *
  * @method ClientEntity               Client()
  * @method Member                     Member()
- * @method ManyManyList|ScopeEntity[] ScopeEntities()
+ * @method ManyManyList<ScopeEntity> ScopeEntities()
  */
 class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
 {
@@ -121,7 +121,7 @@ class AuthCodeEntity extends DataObject implements AuthCodeEntityInterface
     /**
      * @param ScopeEntity[] $scopes
      */
-    public function setScopes($scopes): self
+    public function setScopes($scopes): AuthCodeEntity
     {
         $this->ScopeEntities()->removeAll();
 

@@ -14,11 +14,9 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\SiteConfig\SiteConfig;
 
 /**
- * @method HasManyList|ScopeEntity[] Scopes()
- * @method SiteConfig&static getOwner()
+ * @method HasManyList<ScopeEntity> Scopes()
  */
 class ScopeAdmin extends Extension
 {

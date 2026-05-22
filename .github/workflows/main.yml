@@ -7,8 +7,7 @@ on:
 jobs:
   ci:
     name: CI
-    uses: silverstripe/gha-ci/.github/workflows/ci.yml@v1
+    uses: silverstripe/gha-ci/.github/workflows/ci.yml@v2
     with:
       endtoend: false
-      composer_require_extra: silverstripe/installer:4.13.x-dev
       simple_matrix: true

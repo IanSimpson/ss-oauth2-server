@@ -52,8 +52,7 @@
         "allow-plugins": {
             "composer/installers": true,
             "phpstan/extension-installer": true,
-            "silverstripe/vendor-plugin": true,
-            "*": false
+            "silverstripe/vendor-plugin": true
         },
         "sort-packages": true
     },

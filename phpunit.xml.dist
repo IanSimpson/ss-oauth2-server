@@ -16,7 +16,7 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <source includeUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">code/</directory>
         </include>

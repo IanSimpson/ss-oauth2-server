@@ -182,7 +182,7 @@ class OauthServerControllerTest extends FunctionalTest
             'redirect_uri'          => $c->ClientRedirectUri,
             'auth_code_id'          => $ac->Code,
             'scopes'                => [],
-            'user_id'               => $m->ID,
+            'user_id'               => (string)$m->ID,
             'expire_time'           => strtotime('2099-06-06 12:00:00'),
             'code_challenge'        => null,
             'code_challenge_method' => null,

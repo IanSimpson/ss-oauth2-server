@@ -8,11 +8,7 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\SiteConfig\SiteConfig;
 
-/**
- * @method SiteConfig&static getOwner()
- */
 class AccessTokenAdmin extends Extension
 {
     protected function updateCMSFields(FieldList $fields): void

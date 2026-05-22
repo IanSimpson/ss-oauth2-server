@@ -123,21 +123,21 @@ class OauthServerController extends Controller
      */
     public function __construct()
     {
-        if (!self::hasKey('OAUTH_PRIVATE_KEY_PATH')) {
+        if (!static::hasKey('OAUTH_PRIVATE_KEY_PATH')) {
             throw new Exception('OauthServerController::$privateKey must not be empty!');
         }
 
-        if (!self::hasKey('OAUTH_PUBLIC_KEY_PATH')) {
+        if (!static::hasKey('OAUTH_PUBLIC_KEY_PATH')) {
             throw new Exception('OauthServerController::$publicKey must not be empty!');
         }
 
-        if (!self::hasKey('OAUTH_ENCRYPTION_KEY')) {
+        if (!static::hasKey('OAUTH_ENCRYPTION_KEY')) {
             throw new Exception('OauthServerController::$encryptionKey must not be empty!');
         }
 
-        $this->privateKey = self::createPrivateKey(self::getKey('OAUTH_PRIVATE_KEY_PATH'));
-        $this->publicKey  = self::createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
-        $this->encryptionKey = self::getKey('OAUTH_ENCRYPTION_KEY');
+        $this->privateKey = static::createPrivateKey(static::getKey('OAUTH_PRIVATE_KEY_PATH'));
+        $this->publicKey  = static::createPublicKey(static::getKey('OAUTH_PUBLIC_KEY_PATH'));
+        $this->encryptionKey = static::getKey('OAUTH_ENCRYPTION_KEY');
 
         $this->myRepositories = [
             'client'        => new ClientRepository(),
@@ -165,7 +165,7 @@ class OauthServerController extends Controller
         $grant->setRefreshTokenTTL(new DateInterval('P1M')); // refresh tokens will expire after 1 month
         $this->server->enableGrantType(
             $grant,
-            new DateInterval(self::getGrantTypeExpiryInterval())
+            new DateInterval(static::getGrantTypeExpiryInterval())
         );
 
         // Enable the refresh code grant on the server
@@ -175,18 +175,18 @@ class OauthServerController extends Controller
         $grant->setRefreshTokenTTL(new DateInterval('P1M')); // new refresh tokens will expire after 1 month
         $this->server->enableGrantType(
             $grant,
-            new DateInterval(self::getGrantTypeExpiryInterval())
+            new DateInterval(static::getGrantTypeExpiryInterval())
         );
 
         // Enable Client credentials grant
         $grant = new ClientCredentialsGrant();
         $this->server->enableGrantType(
             $grant,
-            new DateInterval(self::getGrantTypeExpiryInterval())
+            new DateInterval(static::getGrantTypeExpiryInterval())
         );
 
         // Setup logger
-        $this->logger = Injector::inst()->get('IanSimpson\\OAuth2\\Logger'); // @phpstan-ignore-line
+        $this->logger = Injector::inst()->get('IanSimpson\\OAuth2\\Logger');
 
         // Setup adapters, these will be reset on handleRequest()
         $this->myRequestAdapter = new HttpRequestAdapter();
@@ -196,17 +196,17 @@ class OauthServerController extends Controller
 
     public static function getGrantTypeExpiryInterval(): mixed
     {
-        return self::config()->get('grant_expiry_interval') ?? self::$grant_expiry_interval;
+        return static::config()->get('grant_expiry_interval') ?? static::$grant_expiry_interval;
     }
 
     public static function getAuthorizationValidator(): AuthorizationValidatorInterface
     {
-        return self::$authorizationValidator ?? Injector::inst()->get(AuthorizationValidatorInterface::class);
+        return static::$authorizationValidator ?? Injector::inst()->get(AuthorizationValidatorInterface::class);
     }
 
     public static function setAuthorizationValidator(?AuthorizationValidatorInterface $value): void
     {
-        self::$authorizationValidator = $value;
+        static::$authorizationValidator = $value;
     }
 
     public function handleRequest(HTTPRequest $request): HTTPResponse
@@ -305,12 +305,12 @@ class OauthServerController extends Controller
      */
     public static function authenticateRequest($controller): ?ServerRequestInterface
     {
-        $publicKey = self::createPublicKey(self::getKey('OAUTH_PUBLIC_KEY_PATH'));
+        $publicKey = static::createPublicKey(static::getKey('OAUTH_PUBLIC_KEY_PATH'));
 
         $server = new ResourceServer(
             new AccessTokenRepository(),
             $publicKey,
-            self::getAuthorizationValidator()
+            static::getAuthorizationValidator()
         );
 
         $request = ServerRequest::fromGlobals();
@@ -333,7 +333,7 @@ class OauthServerController extends Controller
      */
     public static function getMember($controller): ?Member
     {
-        $request = self::authenticateRequest($controller);
+        $request = static::authenticateRequest($controller);
 
         if (!$request instanceof ServerRequestInterface) {
             return null;

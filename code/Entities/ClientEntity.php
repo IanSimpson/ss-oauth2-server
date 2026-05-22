@@ -168,7 +168,7 @@ class ClientEntity extends DataObject implements ClientEntityInterface
 
         $fields->addFieldToTab(
             'Root.Main',
-            DropdownField::create('ClientGrantType', 'Grant Type', (array) self::config()->get('grant_types'))
+            DropdownField::create('ClientGrantType', 'Grant Type', (array) static::config()->get('grant_types'))
         );
 
         return $fields;
@@ -199,7 +199,7 @@ class ClientEntity extends DataObject implements ClientEntityInterface
     /**
      * {@inheritDoc}
      */
-    public function populateDefaults(): self
+    public function populateDefaults(): ClientEntity
     {
         parent::populateDefaults();
 
@@ -230,7 +230,7 @@ class ClientEntity extends DataObject implements ClientEntityInterface
         return (string) $this->ClientIdentifier;
     }
 
-    public function setConfidential(): self
+    public function setConfidential(): ClientEntity
     {
         $this->isConfidential = $this->ClientConfidential;
 
@@ -273,10 +273,10 @@ class ClientEntity extends DataObject implements ClientEntityInterface
     private function storeSafely(string $secret): void
     {
         if (empty($this->ClientSecretHashMethod)) {
-            $this->ClientSecretHashMethod = self::config()->hash_method;
+            $this->ClientSecretHashMethod = static::config()->hash_method;
         }
         if (empty($this->ClientSecretHashIterations)) {
-            $this->ClientSecretHashIterations = self::config()->hash_iterations;
+            $this->ClientSecretHashIterations = static::config()->hash_iterations;
         }
         if (empty($this->ClientSecretSalt)) {
             $this->ClientSecretSalt = mb_substr((new RandomGenerator())->randomToken(), 0, 32);
